@@ -67,4 +67,71 @@ class TicketController extends Controller
         $ticket = Ticket::with(['event', 'user'])->findOrFail($id);
         return response()->json($ticket);
     }
+
+    public function getEventTickets($eventId)
+    {
+        $tickets = Ticket::with(['user', 'event'])
+                        ->where('event_id', $eventId)
+                        ->orderBy('created_at', 'desc')
+                        ->get();
+        return response()->json($tickets);
+    }
+
+    public function updateStatus(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:menunggu_konfirmasi,dikonfirmasi,ditolak'
+        ]);
+
+        $ticket = Ticket::findOrFail($id);
+        $ticket->status = $validated['status'];
+        
+        // If confirmed AND ticket_code is null (legacy/error fix), generate it
+        if ($ticket->status == 'dikonfirmasi' && !$ticket->ticket_code) {
+             $ticket->ticket_code = 'TCKT-' . strtoupper(uniqid());
+        }
+
+        $ticket->save();
+        return response()->json($ticket);
+    }
+
+    public function verifyTicket(Request $request)
+    {
+        $validated = $request->validate([
+            'ticket_code' => 'required|string',
+            'event_id' => 'required|exists:events,id',
+        ]);
+
+        $ticket = Ticket::where('ticket_code', $validated['ticket_code'])
+                        ->where('event_id', $validated['event_id'])
+                        ->with('user')
+                        ->first();
+
+        if (!$ticket) {
+            return response()->json(['message' => 'Tiket tidak valid untuk event ini'], 404);
+        }
+
+        if ($ticket->status !== 'dikonfirmasi') {
+            return response()->json(['message' => 'Tiket belum dikonfirmasi'], 400);
+        }
+
+        if ($ticket->is_attended) {
+            return response()->json([
+                'status' => 'already_attended',
+                'message' => 'Peserta sudah check-in sebelumnya',
+                'user' => $ticket->user,
+                'ticket' => $ticket
+            ], 200);
+        }
+
+        $ticket->is_attended = true;
+        $ticket->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Check-in Berhasil',
+            'user' => $ticket->user,
+            'ticket' => $ticket
+        ]);
+    }
 }

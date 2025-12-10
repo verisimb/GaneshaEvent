@@ -96,7 +96,7 @@ Panduan pengembangan selanjutnya untuk membangun halaman Admin (**Admin Page**).
 Menu ini berfungsi untuk CRUD Event dan mengelola data event.
 - **Tampilan Utama**: Menampilkan **Card List** dari event yang sudah dibuat.
 - **Fitur Detail**:
-    - **Create Event**: Form untuk membuat event baru (Judul, Deskripsi, Tanggal, Jam, Lokasi, Harga, Gambar, Info Bank).
+    - **Create Event**: Form untuk membuat event baru geratis dan berbayar (Judul, Deskripsi, Tanggal, Jam, Lokasi, Harga, Gambar, Info Bank).
     - **Detail Event (Klik Card)**: Masuk ke halaman detail/edit event.
     - **Edit/Delete**: Admin bisa mengubah info event atau menghapusnya.
     - **Upload Link Sertifikat**: Di halaman detail/edit, sediakan kolom input untuk memasukkan Link GDrive sertifikat (`certificate_link`). Link ini nantinya akan tampil di halaman user yang hadir.

@@ -36,3 +36,8 @@ Route::get('/tickets/{id}', [TicketController::class, 'show']);
 Route::post('/events', [EventController::class, 'store']);
 Route::put('/events/{id}', [EventController::class, 'update']);
 Route::delete('/events/{id}', [EventController::class, 'destroy']);
+
+// Admin Registrations
+Route::get('/events/{id}/tickets', [TicketController::class, 'getEventTickets']);
+Route::put('/tickets/{id}/status', [TicketController::class, 'updateStatus']);
+Route::post('/tickets/verify', [TicketController::class, 'verifyTicket']);
