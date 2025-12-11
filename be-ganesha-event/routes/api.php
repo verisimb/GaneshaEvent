@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\TicketController;
-use App\Http\Controllers\Api\PublicController;
+use App\Http\Controllers\Api\CertificateController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,7 +17,6 @@ use App\Http\Controllers\Api\PublicController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::get('/public-stats', [PublicController::class, 'stats']);
 Route::get('/events', [EventController::class, 'index']);
 Route::get('/events/{id}', [EventController::class, 'show']);
 
@@ -30,6 +29,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/my-tickets', [TicketController::class, 'index']);
     Route::post('/tickets', [TicketController::class, 'store']);
     Route::get('/tickets/{id}', [TicketController::class, 'show']);
+    Route::get('/tickets/{id}/certificate/download', [CertificateController::class, 'download']);
 });
 
 // Admin Events (Keep public/admin specific for now or move if admin auth is ready, but request was for Login/Register features first)
@@ -45,3 +45,4 @@ Route::delete('/events/{id}', [EventController::class, 'destroy']);
 Route::get('/events/{id}/tickets', [TicketController::class, 'getEventTickets']);
 Route::put('/tickets/{id}/status', [TicketController::class, 'updateStatus']);
 Route::post('/tickets/verify', [TicketController::class, 'verifyTicket']);
+

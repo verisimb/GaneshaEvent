@@ -5,11 +5,7 @@ import { useEventStore } from '../../store/useEventStore';
 
 export const HomePage = () => {
   const [searchQuery, setSearchQuery] = React.useState('');
-  const { events, fetchEvents, isLoading, user, stats, fetchStats } = useEventStore();
-
-  useEffect(() => {
-    fetchStats();
-  }, [fetchStats]);
+  const { events, fetchEvents, isLoading, user } = useEventStore();
 
   useEffect(() => {
     fetchEvents(searchQuery);
@@ -27,20 +23,7 @@ export const HomePage = () => {
               <p className="text-base md:text-xl text-white/90 mb-6 md:mb-8 leading-relaxed">
                  Temukan berbagai seminar, workshop, dan kegiatan mahasiswa menarik. Daftar mudah, dapatkan tiket instan, dan unduh sertifikat digital dalam satu aplikasi.
               </p>
-              <div className="flex flex-wrap gap-3 md:gap-4">
-                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 md:p-4 border border-white/20 min-w-[90px] md:min-w-[100px] flex-1 md:flex-none">
-                    <p className="font-bold text-xl md:text-2xl">{stats.events}</p>
-                    <p className="text-xs md:text-sm opacity-80">Event Aktif</p>
-                 </div>
-                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 md:p-4 border border-white/20 min-w-[90px] md:min-w-[100px] flex-1 md:flex-none">
-                    <p className="font-bold text-xl md:text-2xl">{stats.users}</p>
-                    <p className="text-xs md:text-sm opacity-80">User Terdaftar</p>
-                 </div>
-                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 md:p-4 border border-white/20 min-w-[90px] md:min-w-[100px] flex-1 md:flex-none">
-                    <p className="font-bold text-xl md:text-2xl">{stats.certificates}</p>
-                    <p className="text-xs md:text-sm opacity-80">Sertifikat</p>
-                 </div>
-              </div>
+              {/* Stats removed as per request */}
            </div>
            
            {/* Abstract Decoration */}

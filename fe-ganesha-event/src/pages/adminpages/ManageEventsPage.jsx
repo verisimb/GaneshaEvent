@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Plus, MapPin, Search, Edit, Trash, X, Upload, DollarSign, Image as ImageIcon, ExternalLink, QrCode } from 'lucide-react';
+import { Calendar, Plus, MapPin, Search, Edit, Trash, X, Upload, DollarSign, Image as ImageIcon, ExternalLink, QrCode, CheckCircle, FileText } from 'lucide-react';
 import api from '../../lib/axios';
 
 export const ManageEventsPage = () => {
@@ -25,7 +25,8 @@ export const ManageEventsPage = () => {
     bank_name: '',
     account_number: '',
     account_holder: '',
-    certificate_link: '',
+    certificate_template: null,
+    is_completed: false,
     image: null
   });
   const [imagePreview, setImagePreview] = useState(null);
@@ -37,7 +38,7 @@ export const ManageEventsPage = () => {
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      const response = await api.get(`/events?search=${search}`);
+      const response = await api.get(`/events?search=${search}&admin=true`);
       setEvents(response.data);
     } catch (error) {
       console.error('Error fetching events:', error);
@@ -60,7 +61,8 @@ export const ManageEventsPage = () => {
       bank_name: '',
       account_number: '',
       account_holder: '',
-      certificate_link: '',
+      certificate_template: null,
+      is_completed: false,
       image: null
     });
     setImagePreview(null);
@@ -87,7 +89,8 @@ export const ManageEventsPage = () => {
       bank_name: event.bank_name || '',
       account_number: event.account_number || '',
       account_holder: event.account_holder || '',
-      certificate_link: event.certificate_link || '',
+      certificate_template: null, 
+      is_completed: event.is_completed || false,
       image: null // Don't verify old file, just allow new upload
     });
     setImagePreview(event.image_url);
@@ -136,9 +139,12 @@ export const ManageEventsPage = () => {
       payload.append('account_holder', '');
     }
 
-    if (formData.certificate_link) {
-      payload.append('certificate_link', formData.certificate_link);
+    if (formData.certificate_template) {
+      payload.append('certificate_template', formData.certificate_template);
     }
+    
+    // Status completion handling
+    payload.append('is_completed', formData.is_completed ? 1 : 0);
 
     if (formData.image) {
       payload.append('image', formData.image);
@@ -165,6 +171,22 @@ export const ManageEventsPage = () => {
       console.error('Error saving event:', error);
       alert('Terjadi kesalahan saat menyimpan event');
     }
+  };
+
+  const handleCompleteEvent = async (event) => {
+      if (!window.confirm(`Tandai event "${event.title}" sebagai Selesai? Sertifikat akan dapat didownload oleh peserta.`)) return;
+      try {
+          const payload = new FormData();
+          payload.append('_method', 'PUT');
+          payload.append('is_completed', 1);
+          
+          await api.post(`/events/${event.id}`, payload);
+          fetchEvents();
+          alert('Event berhasil diselesaikan!');
+      } catch (error) {
+          console.error('Error completing event', error);
+          alert('Gagal menyelesaikan event');
+      }
   };
 
   const handleFileChange = (e) => {
@@ -230,6 +252,11 @@ export const ManageEventsPage = () => {
                 <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-gray-700 shadow-sm">
                   {event.price > 0 ? `Rp ${event.price.toLocaleString()}` : 'Gratis'}
                 </div>
+                {event.is_completed && (
+                  <div className="absolute top-3 left-3 bg-green-500/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-white shadow-sm flex items-center gap-1">
+                    <CheckCircle className="w-3 h-3" /> Selesai
+                  </div>
+                )}
               </div>
 
               {/* Card Content */}
@@ -263,6 +290,16 @@ export const ManageEventsPage = () => {
                     <Trash className="w-4 h-4" /> Hapus
                   </button>
                 </div>
+                
+                 {/* Completion Action */}
+                 {!event.is_completed && (
+                    <button 
+                        onClick={() => handleCompleteEvent(event)}
+                        className="w-full mt-3 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-green-700 bg-green-50 hover:bg-green-100 rounded-lg border border-green-200 transition-colors"
+                    >
+                        <CheckCircle className="w-4 h-4" /> Tandai Selesai & Rilis Sertifikat
+                    </button>
+                 )}
               </div>
             </div>
           ))}
@@ -372,7 +409,7 @@ export const ManageEventsPage = () => {
                   <div className="space-y-4">
                     <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Banner Event</h3>
                     <div className="flex items-center justify-center w-full">
-                      <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors overflow-hidden relative">
+                      <label className="flex flex-col items-center justify-center w-full aspect-video border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors overflow-hidden relative">
                         {imagePreview ? (
                           <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                         ) : (
@@ -382,9 +419,39 @@ export const ManageEventsPage = () => {
                             <p className="text-xs text-gray-500">PNG, JPG or GIF (Max 2MB)</p>
                           </div>
                         )}
-                        <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
+                        <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} required={!isEditing} />
                       </label>
                     </div>
+                  </div>
+
+                  {/* Certificate Link */}
+                  <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                    <h3 className="text-sm font-semibold text-blue-900 uppercase tracking-wider mb-2 flex items-center gap-2">
+                      <ExternalLink className="w-4 h-4" /> Sertifikat Digital
+                    </h3>
+                    <p className="text-xs text-blue-600 mb-3">
+                      Masukkan template gambar sertifikat (JPG/PNG). Kosongkan nama peserta, sistem akan mengisinya otomatis.
+                    </p>
+                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-blue-200 border-dashed rounded-lg cursor-pointer bg-white hover:bg-blue-50 transition-colors">
+                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                              <Upload className="w-6 h-6 mb-2 text-blue-400" />
+                              <p className="text-xs text-blue-500">
+                                {formData.certificate_template ? 'Ganti Template' : 'Upload Template (Wajib)'}
+                              </p>
+                          </div>
+                          <input 
+                              type="file" 
+                              className="hidden" 
+                              accept="image/*" 
+                              onChange={(e) => setFormData({...formData, certificate_template: e.target.files[0]})}
+                              required={!isEditing && !currentEvent?.certificate_template} 
+                          />
+                    </label>
+                    {formData.certificate_template && (
+                        <p className="mt-2 text-xs text-green-600 font-medium flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3" /> {formData.certificate_template.name}
+                        </p>
+                    )}
                   </div>
 
                   {/* Payment Info */}
@@ -462,24 +529,7 @@ export const ManageEventsPage = () => {
                     )}
                   </div>
 
-                  {/* Certificate Link (Only on Edit) */}
-                  {isEditing && (
-                    <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
-                      <h3 className="text-sm font-semibold text-blue-900 uppercase tracking-wider mb-2 flex items-center gap-2">
-                        <ExternalLink className="w-4 h-4" /> Sertifikat Digital
-                      </h3>
-                      <p className="text-xs text-blue-600 mb-3">
-                        Masukkan link folder GDrive atau file sertifikat untuk peserta yang hadir.
-                      </p>
-                      <input
-                        type="url"
-                        className="w-full px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-white"
-                        value={formData.certificate_link}
-                        onChange={(e) => setFormData({ ...formData, certificate_link: e.target.value })}
-                        placeholder="https://drive.google.com/..."
-                      />
-                    </div>
-                  )}
+
                 </div>
 
                 {/* Footer */}

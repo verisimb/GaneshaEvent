@@ -18,7 +18,8 @@ class Event extends Model
         'bank_name',
         'account_number',
         'account_holder',
-        'certificate_link',
+        'certificate_template',
+        'is_completed',
     ];
 
     public function tickets()

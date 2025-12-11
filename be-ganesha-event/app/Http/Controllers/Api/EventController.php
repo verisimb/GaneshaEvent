@@ -18,6 +18,13 @@ class EventController extends Controller
                   ->orWhere('location', 'like', "%{$search}%");
         }
 
+        if ($request->has('admin') && $request->admin == 'true') {
+             // Admin sees all events
+        } else {
+             // Public sees only active events
+             $query->where('is_completed', 0);
+        }
+
         return response()->json($query->orderBy('date', 'asc')->get());
     }
 
@@ -40,8 +47,14 @@ class EventController extends Controller
             'bank_name' => 'nullable|string',
             'account_number' => 'nullable|string',
             'account_holder' => 'nullable|string',
-            'certificate_link' => 'nullable|string',
+            'certificate_template' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'is_completed' => 'boolean',
         ]);
+
+        if ($request->hasFile('certificate_template')) {
+             $path = $request->file('certificate_template')->store('certificates/templates', 'public');
+             $validated['certificate_template'] = $path;
+        }
 
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('events', 'public');
@@ -68,8 +81,17 @@ class EventController extends Controller
             'bank_name' => 'nullable|string',
             'account_number' => 'nullable|string',
             'account_holder' => 'nullable|string',
-            'certificate_link' => 'nullable|string',
+            'certificate_template' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'is_completed' => 'boolean',
         ]);
+
+        if ($request->hasFile('certificate_template')) {
+             if ($event->certificate_template) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($event->certificate_template);
+             }
+             $path = $request->file('certificate_template')->store('certificates/templates', 'public');
+             $validated['certificate_template'] = $path;
+        }
 
         if ($request->hasFile('image')) {
             // Delete old image if exists and is not a seed URL

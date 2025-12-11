@@ -56,6 +56,18 @@ export const EventDetailPage = () => {
     );
   }
 
+  // Hide completed events from detail view
+  if (event.is_completed) {
+      return (
+        <div className="text-center py-12">
+            <h2 className="text-2xl font-bold text-gray-900">Event tidak ditemukan</h2>
+            <button onClick={() => navigate('/')} className="mt-4 text-primary hover:underline">
+            Kembali ke Home
+            </button>
+        </div>
+      );
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 

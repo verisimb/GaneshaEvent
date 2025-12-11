@@ -131,3 +131,53 @@ Halaman ini dirancang untuk petugas registrasi saat hari-H acara.
     - 🟡 **Peringatan**: Peserta sudah scan sebelumnya (sudah masuk).
     - 🔴 **Gagal**: QR Code tidak valid atau beda event.
 - **Input Manual**: Jika kamera bermasalah, admin bisa mengetik Kode Tiket (misal `TCKT-123`) secara manual.
+
+---
+
+## 🏆 Sertifikat Otomatis (New Feature)
+
+Fitur baru memungkinkan sistem menghasilkan sertifikat secara otomatis dengan nama peserta tercetak di atasnya.
+
+### Cara Menggunakan (Admin)
+1. Buka menu **Manage Events**.
+2. Edit event yang diinginkan.
+3. Upload **Template Sertifikat** (Gambar kosong, format PNG/JPG).
+4. Saat event selesai, klik tombol **"Selesaikan Event"** (Complete Event).
+5. Sistem akan menandai event sebagai selesai dan mengaktifkan download sertifikat bagi peserta yang hadir (`is_attended = 1`).
+
+### Cara Menggunakan (User)
+1. Pastikan sudah hadir dan discan tiketnya oleh panitia.
+2. Buka menu **Sertifikat Saya**.
+3. Klik **Download**. Sistem akan menempelkan nama Anda di atas template yang diupload admin.
+
+---
+
+## 🔄 Panduan Update Developer (Desember 2025)
+
+Jika Anda baru saja menarik perubahan terbaru dari repository (`git pull`), jalankan perintah berikut untuk menyinkronkan project:
+
+### 1. Update Backend
+Folder: `be-ganesha-event`
+
+```bash
+# 1. Install Library baru (Intervention Image)
+composer install
+
+# 2. Update Database (Kolom baru: certificate_template, is_completed)
+php artisan migrate
+
+# 3. Pastikan Font tersedia
+# File 'public/fonts/OpenSans-Bold.ttf' harus ada untuk generate sertifikat.
+# Jika tidak ada, download font ttf apa saja dan rename menjadi OpenSans-Bold.ttf
+```
+
+### 2. Update Frontend
+Folder: `fe-ganesha-event`
+
+```bash
+# 1. Install dependencies baru (jika ada)
+npm install
+
+# 2. Jalankan ulang server
+npm run dev
+```

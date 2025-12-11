@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { QrCode, Search, Calendar, User, UserCheck, AlertCircle, X, ArrowLeft, MapPin } from 'lucide-react';
-import { Html5QrcodeScanner } from 'html5-qrcode';
+import { Html5Qrcode } from 'html5-qrcode';
 import api from '../../lib/axios';
 
 export const AttendancePage = () => {
@@ -26,6 +26,9 @@ export const AttendancePage = () => {
     return () => {
       // Cleanup scanner if component unmounts
       if (scannerRef.current) {
+        if (scannerRef.current.isScanning) {
+             scannerRef.current.stop().catch(e => console.error(e));
+        }
         scannerRef.current.clear().catch(error => console.error("Failed to clear scanner", error));
       }
     };
@@ -83,21 +86,33 @@ export const AttendancePage = () => {
 
     // Tiny timeout to let DOM render the id
     setTimeout(() => {
-      const scanner = new Html5QrcodeScanner(
-        "reader",
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-            /* verbose= */ false
-      );
+      const html5QrCode = new Html5Qrcode("reader");
+      scannerRef.current = html5QrCode;
 
-      scanner.render(onScanSuccess, onScanFailure);
-      scannerRef.current = scanner;
+      const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+      
+      // Start scanning using the rear camera (environment)
+      html5QrCode.start(
+        { facingMode: "environment" }, 
+        config, 
+        onScanSuccess, 
+        onScanFailure
+      )
+      .catch(err => {
+        console.error("Error starting scanner", err);
+        setIsScanning(false);
+        alert("Gagal membuka kamera. Pastikan izin kamera diberikan.");
+      });
+
     }, 100);
   };
 
   const stopScanner = async () => {
     if (scannerRef.current) {
       try {
-        await scannerRef.current.clear();
+         // Pause or stop based on what's active. Stop is better for full close.
+        await scannerRef.current.stop();
+        scannerRef.current.clear();
       } catch (error) {
         console.error("Failed to stop scanner", error);
       }
@@ -106,9 +121,16 @@ export const AttendancePage = () => {
   };
 
   const onScanSuccess = (decodedText, decodedResult) => {
+    // Only verify if not already processing (optional check if pause doesn't work fast enough)
     handleVerify(decodedText);
+    
+    // Check if scanner instance exists and has pause method
     if (scannerRef.current) {
-      scannerRef.current.pause(true); // Pause scanning
+        try {
+             scannerRef.current.pause(true); 
+        } catch (e) {
+            console.warn("Could not pause scanner", e);
+        }
     }
   };
 
