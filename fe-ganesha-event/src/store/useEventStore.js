@@ -43,13 +43,13 @@ export const useEventStore = create((set, get) => ({
   register: async (userData) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await api.post('/register', userData);
-      const { user, token } = response.data;
+      await api.post('/register', userData);
+      // const { user, token } = response.data; // Don't auto-login
       
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
+      // localStorage.setItem('token', token);
+      // localStorage.setItem('user', JSON.stringify(user));
       
-      set({ user, token, isLoading: false });
+      set({ isLoading: false });
       return true;
     } catch (error) {
       set({ 

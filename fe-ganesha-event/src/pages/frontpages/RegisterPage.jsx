@@ -22,7 +22,8 @@ export const RegisterPage = () => {
     e.preventDefault();
     const success = await register(formData);
     if (success) {
-      navigate('/');
+      alert('Registrasi berhasil! Silakan login dengan akun baru Anda.');
+      navigate('/login');
     }
   };
 
