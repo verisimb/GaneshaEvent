@@ -10,10 +10,13 @@ export const AttendancePage = () => {
   const [manualCode, setManualCode] = useState('');
   const [search, setSearch] = useState('');
 
+  // Attendee List State
+  const [attendees, setAttendees] = useState([]);
+  const [loadingAttendees, setLoadingAttendees] = useState(false);
+
   // Scan Result State
   const [scanResult, setScanResult] = useState(null); // { status: 'success'|'error'|'warning', message, user, ticket }
   const [isScanning, setIsScanning] = useState(false);
-  const [recentAttendees, setRecentAttendees] = useState([]);
 
   // Scanner Ref
   const scannerRef = useRef(null);
@@ -28,6 +31,12 @@ export const AttendancePage = () => {
     };
   }, [search]);
 
+  useEffect(() => {
+    if (selectedEvent) {
+      fetchAttendees(selectedEvent.id);
+    }
+  }, [selectedEvent]);
+
   const fetchEvents = async () => {
     try {
       setLoading(true);
@@ -40,10 +49,26 @@ export const AttendancePage = () => {
     }
   };
 
+  const fetchAttendees = async (eventId) => {
+    try {
+      setLoadingAttendees(true);
+      const response = await api.get(`/events/${eventId}/tickets`);
+      // Filter only those who have attended OR show all with status
+      // We'll show all but prioritize attended ones or just a list of "Daftar Hadir" (attended ones)
+      // The request says "berisi list yang sudah absen" (list of those who have attended)
+      const attended = response.data.filter(t => t.is_attended);
+      setAttendees(attended);
+    } catch (error) {
+      console.error('Error fetching attendees:', error);
+    } finally {
+      setLoadingAttendees(false);
+    }
+  };
+
   const handleSelectEvent = (event) => {
     setSelectedEvent(event);
     setScanResult(null);
-    setRecentAttendees([]);
+    setAttendees([]); // Reset while loading new ones
   }
 
   const handleBack = () => {
@@ -112,12 +137,9 @@ export const AttendancePage = () => {
         ticket: ticket
       });
 
-      // Add to recent list if success or warning
-      if (user) {
-        setRecentAttendees(prev => [
-          { ...user, time: new Date().toLocaleTimeString(), status: resultStatus },
-          ...prev.slice(0, 9) // Keep last 10
-        ]);
+      // Refresh attendee list if success
+      if (resultStatus === 'success' || resultStatus === 'warning') {
+        fetchAttendees(selectedEvent.id);
       }
 
     } catch (error) {
@@ -210,7 +232,7 @@ export const AttendancePage = () => {
 
   // View: Scanner
   return (
-    <div className="space-y-6 max-w-5xl mx-auto animate-in slide-in-from-right-4">
+    <div className="space-y-6 max-w-7xl mx-auto animate-in slide-in-from-right-4">
       {/* Header with Back Button */}
       <div className="flex items-center gap-4 border-b border-gray-200 pb-4">
         <button
@@ -227,9 +249,9 @@ export const AttendancePage = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left: Scanner & Input */}
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Left: Scanner & Input (Col Span 5) */}
+        <div className="lg:col-span-5 space-y-6">
           {/* Scanner Box */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
@@ -264,20 +286,17 @@ export const AttendancePage = () => {
               <input
                 type="text"
                 className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                placeholder="Masukkan Kode Tiket (Contoh: TCKT-X1Y2)"
+                placeholder="Kode Tiket"
                 value={manualCode}
                 onChange={(e) => setManualCode(e.target.value)}
               />
               <button type="submit" className="px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors font-medium">
-                Verifikasi
+                Cek
               </button>
             </form>
           </div>
-        </div>
 
-        {/* Right: Recent Attendees & Status */}
-        <div className="space-y-6">
-          {/* Result Card */}
+          {/* Result Card (When scanning) */}
           {scanResult && (
             <div className={`p-6 rounded-2xl shadow-lg border-l-4 animate-in slide-in-from-top-4
                        ${scanResult.status === 'success' ? 'bg-green-50 border-green-500' :
@@ -311,43 +330,73 @@ export const AttendancePage = () => {
                         <p className="font-semibold text-gray-900">{scanResult.user.name}</p>
                       </div>
                       <p className="text-xs text-gray-500 ml-6">{scanResult.user.email}</p>
-                      <div className="mt-2 pt-2 border-t border-black/5 flex justify-between items-center text-xs">
-                        <span className="text-gray-500">Kode Tiket:</span>
-                        <span className="font-mono font-medium text-gray-700">{scanResult.ticket.ticket_code}</span>
-                      </div>
                     </div>
                   )}
                 </div>
               </div>
             </div>
           )}
+        </div>
 
-          {/* Recent List */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="p-4 border-b border-gray-100 bg-gray-50">
-              <h3 className="font-bold text-gray-700">Riwayat Sesi Ini</h3>
+        {/* Right: Attendee List (Col Span 7) */}
+        <div className="lg:col-span-7">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden h-full flex flex-col">
+            <div className="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+              <div>
+                <h3 className="font-bold text-lg text-gray-800">Daftar Hadir</h3>
+                <p className="text-sm text-gray-500">Total: {attendees.length} Peserta</p>
+              </div>
+              <button onClick={() => fetchAttendees(selectedEvent.id)} className="p-2 hover:bg-gray-200 rounded-full transition-colors">
+                <Search className="w-5 h-5 text-gray-500" />
+              </button>
             </div>
-            <div className="divide-y divide-gray-100 max-h-[400px] overflow-y-auto">
-              {recentAttendees.length === 0 ? (
-                <div className="p-8 text-center">
-                  <UserCheck className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                  <p className="text-gray-400 text-sm">Belum ada peserta yang check-in</p>
+
+            <div className="flex-1 overflow-y-auto p-0">
+              {loadingAttendees ? (
+                <div className="p-12 text-center text-gray-400">Memuat data peserta...</div>
+              ) : attendees.length === 0 ? (
+                <div className="p-12 text-center">
+                  <UserCheck className="w-16 h-16 text-gray-200 mx-auto mb-4" />
+                  <p className="text-gray-400 font-medium">Belum ada peserta yang check-in</p>
+                  <p className="text-gray-400 text-sm mt-1">Scan QR code untuk memulai check-in</p>
                 </div>
               ) : (
-                recentAttendees.map((attendee, idx) => (
-                  <div key={idx} className="p-4 hover:bg-gray-50 transition-colors flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm
-                                          ${attendee.status === 'success' ? 'bg-gradient-to-br from-green-400 to-green-600' : 'bg-gradient-to-br from-yellow-400 to-yellow-600'}`}>
-                        {attendee.name.charAt(0)}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900 line-clamp-1">{attendee.name}</p>
-                        <p className="text-xs text-gray-400">{attendee.time}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))
+                <table className="w-full text-left">
+                  <thead className="bg-gray-50 text-gray-500 text-xs uppercase font-semibold">
+                    <tr>
+                      <th className="px-6 py-4">Peserta</th>
+                      <th className="px-6 py-4">Tiket</th>
+                      <th className="px-6 py-4 text-right">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {attendees.map((item, idx) => (
+                      <tr key={idx} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-blue-400 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                              {item.user.name.charAt(0)}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-gray-900">{item.user.name}</p>
+                              <p className="text-xs text-gray-500">{item.user.email}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="font-mono text-xs bg-gray-100 px-2 py-1 rounded text-gray-600 border border-gray-200">
+                            {item.ticket_code}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200">
+                            <UserCheck className="w-3 h-3" /> Hadir
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               )}
             </div>
           </div>
