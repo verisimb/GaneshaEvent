@@ -88,35 +88,43 @@ Frontend akan berjalan di: `http://localhost:5173`
 
 ---
 
-## 🔮 Future Roadmap: Admin Panel
+## � Fitur Admin Panel
 
-Panduan pengembangan selanjutnya untuk membangun halaman Admin (**Admin Page**).
+Halaman Admin dapat diakses melalui route `/admin`. Fitur ini memungkinkan administrator untuk mengelola event, pendaftar, dan absensi hari-H.
 
-### 1. Menu "Kelola Kegiatan" (Manage Events)
-Menu ini berfungsi untuk CRUD Event dan mengelola data event.
-- **Tampilan Utama**: Menampilkan **Card List** dari event yang sudah dibuat.
-- **Fitur Detail**:
-    - **Create Event**: Form untuk membuat event baru geratis dan berbayar (Judul, Deskripsi, Tanggal, Jam, Lokasi, Harga, Gambar, Info Bank).
-    - **Detail Event (Klik Card)**: Masuk ke halaman detail/edit event.
-    - **Edit/Delete**: Admin bisa mengubah info event atau menghapusnya.
-    - **Upload Link Sertifikat**: Di halaman detail/edit, sediakan kolom input untuk memasukkan Link GDrive sertifikat (`certificate_link`). Link ini nantinya akan tampil di halaman user yang hadir.
+### 1. Kelola Kegiatan (Manage Events)
+Route: `/admin/events`
+Menu ini berfungsi untuk **CRUD Event** (Create, Read, Update, Delete).
 
-### 2. Menu "Kelola Pendaftar" (Manage Registrations)
-Menu ini berfungsi untuk memverifikasi pembayaran dan pendaftaran peserta.
-- **Tampilan Utama**: Menampilkan **Card List** (sama seperti Kelola Kegiatan), admin memilih event mana yang ingin dicek.
-- **Halaman Detail Pendaftar**:
-    - Setelah klik event, muncul **Tabel/List Peserta** yang mendaftar di event tersebut.
-    - **Kolom Tabel**: Nama, Email, Tanggal Daftar, Status Pembayaran, **Bukti Bayar (Button Lihat)**.
-    - **Action**: Tombol untuk mengubah status tiket:
-        - `Menunggu Konfirmasi` -> **`Dikonfirmasi`** (Jika bukti bayar valid).
-        - `Ditolak` (Jika bukti bayar tidak valid).
+- **Tampilan Utama**: Grid Cards event yang sudah dibuat.
+- **Fitur**:
+    - **Buat Event Baru**: Form lengkap untuk judul, deskripsi, waktu, lokasi, harga (Gratis/Berbayar), info pembayaran, dan upload banner.
+    - **Sertifikat Digital**: Pada menu **Edit Event**, admin dapat memasukkan link GDrive/Sertifikat (`certificate_link`). Link ini akan muncul di dashboard user yang hadir.
+    - **Edit & Hapus**: Mengubah informasi event yang sudah berjalan atau menghapusnya.
 
-### 3. Menu "Absensi" (Attendance)
-Menu ini digunakan saat hari-H acara untuk mencatat kehadiran peserta via QR Code.
-- **Tampilan Utama**: List Event yang sedang/akan berlangsung.
-- **Fitur Scan**:
-    - Saat event diklik, masuk ke mode **Scan QR**.
-    - Admin menggunakan kamera/scanner untuk scan QR Code tiket peserta (`TCKT-XXX`).
-    - **Sistem**: Jika QR valid, sistem otomatis update kolom `is_attended` di tabel `tickets` menjadi `true`.
-- **List Kehadiran**: Di halaman ini juga tampilkan tabel siapa saja yang sudah scan/hadir.
-- **Efek**: Peserta yang sudah ditandai hadir (`is_attended = true`) otomatis bisa melihat tombol "Download Sertifikat" di halaman user mereka (asalkan link sertifikat sudah diinput di menu Kelola Kegiatan).
+### 2. Kelola Pendaftar (Manage Registrations)
+Route: `/admin/registrations`
+Menu ini digunakan untuk memverifikasi pembayaran peserta event berbayar.
+
+- **Alur**: Pilih Event -> Lihat Tabel Pendaftar.
+- **Fitur Table**:
+    - Menampilkan Nama, Email, dan Status Tiket.
+    - **Cek Bukti Bayar**: Klik tombol "Lihat" (ikon mata) untuk melihat foto bukti transfer.
+    - **Verifikasi**:
+        - ✅ **Konfirmasi**: Mengubah status menjadi `Confirmed` (Tiket QR Code aktif).
+        - ❌ **Tolak**: Mengubah status menjadi `Rejected` (Jika bukti bayar salah).
+
+### 3. Absensi & QR Scanner (Attendance)
+Route: `/admin/attendance`
+Halaman ini dirancang untuk petugas registrasi saat hari-H acara.
+
+- **Cara Kerja**:
+    1. Pilih Event yang sedang berlangsung.
+    2. Browser akan meminta izin akses **Kamera**.
+    3. Arahkan kamera ke **QR Code Tiket** peserta.
+    4. Sistem otomatis memverifikasi ke server.
+- **Status Scan**:
+    - 🟢 **Sukses**: Data valid, peserta ditandai hadir (`is_attended = 1`).
+    - 🟡 **Peringatan**: Peserta sudah scan sebelumnya (sudah masuk).
+    - 🔴 **Gagal**: QR Code tidak valid atau beda event.
+- **Input Manual**: Jika kamera bermasalah, admin bisa mengetik Kode Tiket (misal `TCKT-123`) secara manual.
