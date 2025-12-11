@@ -14,7 +14,7 @@ class TicketController extends Controller
         // For testing without auth, we'll fetch tickets for user_id 1 or return all tickets
         // $user = $request->user();
         // $userId = $user ? $user->id : 1;
-        $userId = 1; // HARDCODED for testing
+        $userId = $request->user()->id; 
         
         $tickets = Ticket::with(['event'])->where('user_id', $userId)->get();
         return response()->json($tickets);
@@ -27,7 +27,7 @@ class TicketController extends Controller
             'payment_proof' => 'nullable', // Permit file or string
         ]);
 
-        $userId = 1; // HARDCODED for testing
+        $userId = $request->user()->id;
 
         // Check if user is already registered for THIS event
         $exists = Ticket::where('user_id', $userId)

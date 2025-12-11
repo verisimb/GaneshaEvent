@@ -21,9 +21,10 @@ const App = () => {
         <Route path="tickets" element={<MyTicketsPage />} />
         <Route path="certificates" element={<MyCertificatesPage />} />
         <Route path="event/:id" element={<EventDetailPage />} />
-        {/* <Route path="login" element={<LoginPage />} /> */}
-        {/* <Route path="register" element={<RegisterPage />} /> */}
       </Route>
+
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
       
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<Navigate to="events" replace />} />

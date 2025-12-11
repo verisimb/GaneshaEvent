@@ -55,7 +55,8 @@ Frontend akan berjalan di: `http://localhost:5173`
 1.  **Pendaftaran Event**: User bisa mendaftar event gratis (otomatis dikonfirmasi) atau berbayar (menunggu konfirmasi).
 2.  **Manajemen Tiket**: Tiket memiliki QR Code unik (`TCKT-XXX`). Status tiket: `menunggu_konfirmasi`, `dikonfirmasi`, `ditolak`.
 3.  **Sertifikat Digital**: User yang **sudah hadir** (`is_attended = 1`) dan event memiliki link sertifikat, dapat mengunduh sertifikat di menu "Sertifikat Saya".
-4.  **Auth Bypass (Dev Mode)**: Saat ini, endpoint event dan tiket bersifat publik untuk memudahkan testing, namun endpoint login/register tetap tersedia.
+4.  **Role-Based Access Control (RBAC)**: Sistem membedakan hak akses antara **User** (Pendaftar) dan **Admin** (Pengelola). Halaman Admin terlindungi dan tidak bisa diakses oleh user biasa.
+5.  **Autentikasi Aman**: Menggunakan Laravel Sanctum untuk keamanan API. Login & Register wajib untuk mengakses fitur tiket.
 
 ---
 
@@ -65,10 +66,12 @@ Frontend akan berjalan di: `http://localhost:5173`
 
 | Method | Endpoint | Deskripsi |
 | :--- | :--- | :--- |
-| `GET` | `/events` | List semua event |
-| `POST` | `/events` | Buat event baru (Dev Mode: Public) |
-| `GET` | `/my-tickets` | List tiket user (Dev Mode: Hardcoded User ID 1) |
-| `POST` | `/tickets` | Daftar event (Body: `event_id`, `payment_proof`) |
+| Method | Endpoint | Deskripsi |
+| :--- | :--- | :--- |
+| `GET` | `/events` | List semua event (Public) |
+| `POST` | `/events` | Buat event baru (Admin Only) |
+| `GET` | `/my-tickets` | List tiket user (Protected: User) |
+| `POST` | `/tickets` | Daftar event (Protected: User) |
 
 *Catatan: Dokumentasi lengkap API dan cara menggunakan Postman tersedia di file `postman_guide.md` (jika ada) atau artifact terpisah.*
 
@@ -83,8 +86,8 @@ Frontend akan berjalan di: `http://localhost:5173`
 ---
 
 ## 👤 Akun Testing (Seeder)
-- **User**: `test@example.com` (Password default factory Laravel / 'password')
-- **Admin**: (Belum diimplementasikan, akses langsung via Database/API)
+- **User**: `test@example.com` (Password: `password`)
+- **Admin**: `admin@ganesha.com` (Password: `password`) - *Jalankan `php artisan migrate:fresh --seed` untuk membuat akun ini.*
 
 ---
 

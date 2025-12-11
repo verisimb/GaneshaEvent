@@ -59,11 +59,11 @@ export const EventDetailPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // if (!user) {
-    //     alert('Silakan login terlebih dahulu untuk mendaftar.');
-    //     navigate('/login');
-    //     return;
-    // }
+    if (!user) {
+        alert('Silakan login terlebih dahulu untuk mendaftar.');
+        navigate('/login');
+        return;
+    }
 
     if (!formData.name || !formData.email || !formData.nim || !formData.phone) {
       alert('Mohon lengkapi data diri anda di profil atau form ini');

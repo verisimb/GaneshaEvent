@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useEventStore } from '../../store/useEventStore';
 import { Helmet } from 'react-helmet-async';
+import logo from '../../assets/GaneshaEventLogo.png';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
@@ -27,10 +28,15 @@ export const LoginPage = () => {
       <Helmet>
         <title>Login - Ganesha Event</title>
       </Helmet>
-      <div className="min-h-[80vh] flex items-center justify-center">
-        <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 w-full max-w-md">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2 text-center">Selamat Datang Kembali</h1>
-          <p className="text-gray-500 text-center mb-8">Masuk untuk mengakses tiket anda</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-xl border border-gray-100">
+          <div className="flex flex-col items-center">
+            <img className="h-12 w-auto mb-6" src={logo} alt="Ganesha Event" />
+            <h2 className="text-3xl font-extrabold text-gray-900 text-center">
+              Selamat Datang Kembali
+            </h2>
+            <p className="text-gray-500 text-center mt-2">Masuk untuk mengakses tiket anda</p>
+          </div>
 
           {error && (
             <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">

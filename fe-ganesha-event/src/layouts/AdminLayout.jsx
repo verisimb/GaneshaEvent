@@ -1,15 +1,24 @@
-import React, { useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
-import { Calendar, Users, QrCode, Menu, X } from 'lucide-react';
-
-// ... (in AdminLayout)
-
-
+import React, { useState, useEffect } from 'react';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { clsx } from 'clsx';
+import { Calendar, Users, QrCode, Menu, X } from 'lucide-react';
+import { useEventStore } from '../store/useEventStore';
 import logo from '../assets/GaneshaEventLogo.png';
 
 export const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { user } = useEventStore();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user || user.role !== 'admin') {
+      navigate('/');
+    }
+  }, [user, navigate]);
+
+  if (!user || user.role !== 'admin') {
+    return null;
+  }
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 

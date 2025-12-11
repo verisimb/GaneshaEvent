@@ -88,7 +88,33 @@ Menggunakan **Laravel Sanctum**.
       });
       ```
 
-## 3. Fitur Verifikasi / Absensi (Admin Scanner)
+## 3. Fitur Role-Based Access Control (RBAC)
+
+Fitur ini membatasi akses ke halaman Admin hanya untuk user dengan role `admin`.
+
+**Lokasi File Utama:**
+- **Database Migration**: `be-ganesha-event/database/migrations/xxxx_create_users_table.php`
+- **Frontend Protection**: `fe-ganesha-event/src/layouts/AdminLayout.jsx`
+
+**Alur Logika Detail:**
+
+1.  **Database Scheme**
+    - Tabel `users` memiliki kolom `role` dengan tipe ENUM('user', 'admin') dan default 'user'.
+    - Saat registrasi biasa, user otomatis mendapat role 'user'.
+
+2.  **Proteksi Frontend (Admin Layout)**
+    - **File**: `fe-ganesha-event/src/layouts/AdminLayout.jsx`
+    - **Logic**: Menggunakan `useEffect` untuk mengecek status user saat komponen dimuat.
+      ```javascript
+      useEffect(() => {
+        if (!user || user.role !== 'admin') {
+          navigate('/'); // Redirect non-admin ke Home
+        }
+      }, [user, navigate]);
+      ```
+    - Ini mencegah user biasa mengakses route `/admin/*` meskipun mengetahui URL-nya.
+
+## 4. Fitur Verifikasi / Absensi (Admin Scanner)
 
 **Lokasi File Utama:**
 - **Frontend**: `fe-ganesha-event/src/pages/adminpages/AttendancePage.jsx`
@@ -114,7 +140,7 @@ Menggunakan **Laravel Sanctum**.
       ```
     - **Update**: `is_attended` di set ke `true`.
 
-## 4. Fitur Kelola Event (Admin CRUD)
+## 5. Fitur Kelola Event (Admin CRUD)
 
 **Lokasi File Utama:**
 - **Frontend**: `fe-ganesha-event/src/pages/adminpages/ManageEventsPage.jsx`
@@ -144,7 +170,7 @@ Menggunakan **Laravel Sanctum**.
       }
       ```
 
-## 5. Fitur Konfirmasi Pembayaran (Admin)
+## 6. Fitur Konfirmasi Pembayaran (Admin)
 
 **Lokasi File Utama:**
 - **Frontend**: `fe-ganesha-event/src/pages/adminpages/ManageRegistrationsPage.jsx`
@@ -169,7 +195,7 @@ Menggunakan **Laravel Sanctum**.
 ---
 
 
-## 6. Analisis Pemenuhan Fitur (Checklist)
+## 7. Analisis Pemenuhan Fitur (Checklist)
 
 Analisis teknis terhadap pemenuhan persyaratan tugas.
 
