@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Search } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import { EventCard } from '../../components/EventCard';
 import { useEventStore } from '../../store/useEventStore';
 
@@ -13,6 +14,15 @@ export const HomePage = () => {
 
   return (
     <div className="space-y-8">
+      <Helmet>
+        <title>Ganesha Event - Platform Event Kampus Terlengkap</title>
+        <meta name="description" content="Temukan berbagai seminar, workshop, dan kegiatan mahasiswa menarik di Universitas Ganesha. Daftar mudah dan dapatkan sertifikat digital." />
+        <meta property="og:title" content="Ganesha Event - Platform Event Kampus Terlengkap" />
+        <meta property="og:description" content="Temukan berbagai seminar, workshop, dan kegiatan mahasiswa menarik di Universitas Ganesha." />
+        <meta property="og:image" content="/og-image.jpg" />
+        <meta property="og:type" content="website" />
+      </Helmet>
+
       {/* Hero Section for Guests */}
       {!user && (
         <div className="bg-gradient-to-r from-primary to-[#801328] rounded-3xl p-6 md:p-12 text-white relative overflow-hidden shadow-xl">

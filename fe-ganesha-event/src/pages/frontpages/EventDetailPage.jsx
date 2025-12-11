@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, ArrowLeft } from 'lucide-react';
+import { Calendar, MapPin, ArrowLeft, Share2, Copy, Check } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { useEventStore } from '../../store/useEventStore';
 
@@ -10,6 +10,8 @@ export const EventDetailPage = () => {
   const { getEventById, registerEvent, user, isLoading } = useEventStore();
   const [event, setEvent] = useState(null);
   const [loadingEvent, setLoadingEvent] = useState(true);
+  const [copied, setCopied] = useState(false);
+  const [showShareMenu, setShowShareMenu] = useState(false);
 
   const [formData, setFormData] = useState({
     name: user?.name || '',
@@ -41,6 +43,17 @@ export const EventDetailPage = () => {
     }
   }, [user]);
 
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleWhatsAppShare = () => {
+    const text = `Cek event keren ini: ${event.title} di Ganesha Event! \nLink: ${window.location.href}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  };
+
   if (loadingEvent) {
     return <div className="text-center py-12">Memuat event...</div>;
   }
@@ -71,18 +84,9 @@ export const EventDetailPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Auth check removed here, handled by UI conditional rendering
-    // if (!user) { ... }
-
     if (!formData.name || !formData.email || !formData.nim || !formData.phone) {
       alert('Mohon lengkapi data diri anda di profil atau form ini');
-      // For a real app, we might want to update the user profile here too, 
-      // but for now we just proceed with registration.
     }
-    
-    // In a real file upload, we'd need to handle the file specifically.
-    // For this demo, we'll assume the payment proof is handled or optional for free events.
-    // Since our backend expects a string or null for payment_proof, let's keep it simple.
     
     if (event.price > 0 && !formData.paymentProof) {
         alert('Mohon upload bukti pembayaran untuk event berbayar.');
@@ -94,9 +98,6 @@ export const EventDetailPage = () => {
         alert('Pendaftaran berhasil! Silakan tunggu konfirmasi admin.');
         navigate('/tickets');
     } else {
-        // We really should show the actual error from the store/response, 
-        // but since the store only returns bool, we'll give a generic message 
-        // that covers both duplicates and server errors.
         alert('Pendaftaran gagal. Pastikan anda belum terdaftar atau coba lagi nanti.');
     }
   };
@@ -106,6 +107,47 @@ export const EventDetailPage = () => {
       <Helmet>
         <title>{event.title} - Ganesha Event</title>
         <meta name="description" content={event.description} />
+        {/* Open Graph / Social Media Tags */}
+        <meta property="og:title" content={event.title} />
+        <meta property="og:description" content={event.description?.substring(0, 150)} />
+        <meta property="og:image" content={event.image_url || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87'} />
+        <meta property="og:url" content={window.location.href} />
+        <meta property="og:type" content="website" />
+        
+        {/* JSON-LD Structured Data for Google Rich Snippets */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Event",
+            "name": event.title,
+            "description": event.description,
+            "image": event.image_url || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87',
+            "startDate": event.date, // Note: Should ideally be ISO format (YYYY-MM-DDTHH:mm:ss) but using date string for now
+            "eventStatus": "https://schema.org/EventScheduled",
+            "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+            "location": {
+              "@type": "Place",
+              "name": event.location,
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": event.location,
+                "addressLocality": "Singaraja",
+                "addressRegion": "Bali",
+                "addressCountry": "ID"
+              }
+            },
+            "organizer": {
+              "@type": "Organization",
+              "name": event.organizer
+            },
+            "offers": {
+              "@type": "Offer",
+              "price": event.price,
+              "priceCurrency": "IDR",
+              "availability": "https://schema.org/InStock"
+            }
+          })}
+        </script>
       </Helmet>
 
       <div className="max-w-4xl mx-auto space-y-8 pb-12">
@@ -122,10 +164,61 @@ export const EventDetailPage = () => {
         <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100">
           <div className="relative h-64 md:h-96">
             <img src={event.image_url || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87'} alt={event.title} className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-8">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-8">
+               <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                  <div>
+                    <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">{event.title}</h1>
+                    <p className="text-white/90 text-lg">{event.organizer}</p>
+                  </div>
+                  
+                  {/* Share Button & Dropdown */}
+                  <div className="relative">
+                      <button 
+                        onClick={() => {
+                            if (navigator.share) {
+                                navigator.share({
+                                    title: event.title,
+                                    text: `Cek event keren ini: ${event.title} di Ganesha Event!`,
+                                    url: window.location.href,
+                                }).catch(console.error);
+                            } else {
+                                setShowShareMenu(!showShareMenu);
+                            }
+                        }}
+                        className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors"
+                      >
+                         <Share2 size={16} />
+                         Bagikan
+                      </button>
 
-               <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">{event.title}</h1>
-               <p className="text-white/90 text-lg">{event.organizer}</p>
+                      {/* Desktop Fallback Dropdown */}
+                      {showShareMenu && (
+                        <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50 animate-in fade-in zoom-in-95 duration-200">
+                            <button 
+                                onClick={() => {
+                                    handleWhatsAppShare();
+                                    setShowShareMenu(false);
+                                }}
+                                className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                            >
+                                <Share2 size={16} className="text-green-500" />
+                                WhatsApp
+                            </button>
+                            <div className="border-b border-gray-100"></div>
+                            <button 
+                                onClick={() => {
+                                    handleCopyLink();
+                                    setShowShareMenu(false);
+                                }}
+                                className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                            >
+                                {copied ? <Check size={16} className="text-primary" /> : <Copy size={16} className="text-gray-400" />}
+                                {copied ? 'Tersalin' : 'Salin Link'}
+                            </button>
+                        </div>
+                      )}
+                  </div>
+               </div>
             </div>
           </div>
 
