@@ -59,11 +59,8 @@ export const EventDetailPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!user) {
-        alert('Silakan login terlebih dahulu untuk mendaftar.');
-        navigate('/login');
-        return;
-    }
+    // Auth check removed here, handled by UI conditional rendering
+    // if (!user) { ... }
 
     if (!formData.name || !formData.email || !formData.nim || !formData.phone) {
       alert('Mohon lengkapi data diri anda di profil atau form ini');
@@ -158,6 +155,7 @@ export const EventDetailPage = () => {
                       </p>
                    </div>
                    
+                   {user ? (
                    <form onSubmit={handleSubmit} className="space-y-4 max-w-2xl">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
@@ -234,6 +232,17 @@ export const EventDetailPage = () => {
                         {isLoading ? 'Memproses...' : 'Beli Tiket'}
                       </button>
                    </form>
+                   ) : (
+                     <div className="bg-gray-50 border border-gray-100 rounded-xl p-8 text-center flex flex-col items-center gap-4">
+                        <p className="text-gray-600">Anda harus login terlebih dahulu untuk mendaftar di event ini.</p>
+                        <button 
+                            onClick={() => navigate('/login')}
+                            className="w-full md:w-auto px-8 bg-primary hover:bg-[#5a0d1c] text-white font-bold py-3 rounded-xl transition-all shadow-md hover:shadow-lg"
+                        >
+                            Masuk untuk mendaftar kegiatan
+                        </button>
+                     </div>
+                   )}
                 </div>
              </div>
           </div>

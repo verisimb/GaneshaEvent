@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\TicketController;
+use App\Http\Controllers\Api\PublicController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,6 +17,7 @@ use App\Http\Controllers\Api\TicketController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
+Route::get('/public-stats', [PublicController::class, 'stats']);
 Route::get('/events', [EventController::class, 'index']);
 Route::get('/events/{id}', [EventController::class, 'show']);
 

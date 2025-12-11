@@ -18,6 +18,7 @@ export const useEventStore = create((set, get) => ({
   tickets: [],
   isLoading: false,
   error: null,
+  stats: { events: 0, users: 0, certificates: 0 },
 
   // Auth Actions
   login: async (email, password) => {
@@ -73,6 +74,15 @@ export const useEventStore = create((set, get) => ({
   },
 
   // Event Actions
+  fetchStats: async () => {
+    try {
+      const response = await api.get('/public-stats');
+      set({ stats: response.data });
+    } catch (error) {
+      console.error('Failed to fetch stats', error);
+    }
+  },
+
   fetchEvents: async (search = '') => {
     set({ isLoading: true });
     try {
