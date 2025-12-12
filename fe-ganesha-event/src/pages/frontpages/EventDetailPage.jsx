@@ -9,10 +9,10 @@ import Swal from 'sweetalert2';
 import toast from 'react-hot-toast';
 
 export const EventDetailPage = () => {
-  const { id } = useParams();
+  const { slug } = useParams();
   const navigate = useNavigate();
   const { registerEvent, user, isLoading: isRegistering } = useEventStore();
-  const { data: event, isLoading: loadingEvent, isError } = useEvent(id);
+  const { data: event, isLoading: loadingEvent, isError } = useEvent(slug);
   
   const [copied, setCopied] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);

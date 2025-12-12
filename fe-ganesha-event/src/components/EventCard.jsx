@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 export const EventCard = ({ event }) => {
   return (
-    <Link to={`/event/${event.id}`} className="block group h-full">
+    <Link to={`/event/${event.slug || event.id}`} className="block group h-full">
       <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 flex flex-col h-full">
         {/* Image Container */}
         <div className="relative aspect-[16/9] overflow-hidden">
