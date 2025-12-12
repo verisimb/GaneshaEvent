@@ -1,19 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Calendar, MapPin, Clock, X, Ticket } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { clsx } from 'clsx';
 import { QRCodeCanvas } from 'qrcode.react';
-import { useEventStore } from '../../store/useEventStore';
+import { useMyTickets } from '../../hooks/useTickets';
+import { TicketSkeleton } from '../../components/skeletons/TicketSkeleton';
 
 export const MyTicketsPage = () => {
   const [selectedTicket, setSelectedTicket] = useState(null);
-  const { tickets, fetchMyTickets, isLoading } = useEventStore();
-
-  useEffect(() => {
-    fetchMyTickets();
-  }, [fetchMyTickets]);
-
-  const myTickets = tickets;
+  const { data: myTickets, isLoading } = useMyTickets();
 
   return (
     <div className="space-y-6">
@@ -23,8 +18,10 @@ export const MyTicketsPage = () => {
       </h1>
 
       {isLoading ? (
-        <p className="text-center">Memuat tiket...</p>
-      ) : myTickets.length > 0 ? (
+        <div className="space-y-4">
+             {[...Array(3)].map((_, i) => <TicketSkeleton key={i} />)}
+        </div>
+      ) : myTickets && myTickets.length > 0 ? (
         <div className="space-y-4">
           {myTickets.map(({ id, status, event, created_at, event_id, ticket_code }) => (
             event && (

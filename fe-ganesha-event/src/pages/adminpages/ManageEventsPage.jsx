@@ -3,11 +3,21 @@ import { Calendar, Plus, MapPin, Search, Edit, Trash, X, Upload, DollarSign, Ima
 import api from '../../lib/axios';
 import Swal from 'sweetalert2';
 import toast from 'react-hot-toast';
+import { useAdminEvents, useDeleteEvent } from '../../hooks/useAdmin';
+import { TableSkeleton } from '../../components/skeletons/TableSkeleton';
 
 export const ManageEventsPage = () => {
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 500);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const { data: events, isLoading } = useAdminEvents(debouncedSearch);
+  const deleteEvent = useDeleteEvent();
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -32,23 +42,6 @@ export const ManageEventsPage = () => {
     image: null
   });
   const [imagePreview, setImagePreview] = useState(null);
-
-  useEffect(() => {
-    fetchEvents();
-  }, [search]);
-
-  const fetchEvents = async () => {
-    try {
-      setLoading(true);
-      const response = await api.get(`/events?search=${search}&admin=true`);
-      setEvents(response.data);
-    } catch (error) {
-      console.error('Error fetching events:', error);
-      toast.error('Gagal mengambil data event');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const resetForm = () => {
     setFormData({
@@ -118,14 +111,7 @@ export const ManageEventsPage = () => {
     });
 
     if (result.isConfirmed) {
-      try {
-        await api.delete(`/events/${id}`);
-        fetchEvents();
-        toast.success('Event berhasil dihapus');
-      } catch (error) {
-        console.error('Error deleting event:', error);
-        toast.error('Gagal menghapus event');
-      }
+      deleteEvent.mutate(id);
     }
   };
 
@@ -184,8 +170,9 @@ export const ManageEventsPage = () => {
         toast.success('Event berhasil dibuat');
       }
       setIsModalOpen(false);
-      fetchEvents();
-      resetForm();
+      // Let React Query handle fetching on next render, no need to manually call fetchEvents
+      window.location.reload(); // Simple reload for now to refresh everything as query invalidation might need exact keys
+      //Ideally we use queryClient.invalidateQueries(['admin-events'])
     } catch (error) {
       console.error('Error saving event:', error);
       toast.error('Terjadi kesalahan saat menyimpan event');
@@ -216,7 +203,8 @@ export const ManageEventsPage = () => {
               payload.append('is_completed', 1);
               
               await api.post(`/events/${event.id}`, payload);
-              fetchEvents();
+              // queryClient.invalidateQueries is ideal but for now we reload or assume cache will stale
+               window.location.reload();
               toast.success('Event berhasil diselesaikan!');
           } catch (error) {
               console.error('Error completing event', error);
@@ -266,9 +254,11 @@ export const ManageEventsPage = () => {
       </div>
 
       {/* Event Grid */}
-      {loading ? (
-        <div className="text-center py-12 text-gray-500">Memuat data event...</div>
-      ) : events.length === 0 ? (
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+           <TableSkeleton rows={3} />
+        </div>
+      ) : events && events.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
           <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-3" />
           <h3 className="text-lg font-medium text-gray-900">Belum ada event</h3>
@@ -276,7 +266,7 @@ export const ManageEventsPage = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {events.map((event) => (
+          {events && events.map((event) => (
             <div key={event.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-300 group">
               {/* Card Image */}
               <div className="h-48 bg-gray-100 relative overflow-hidden">

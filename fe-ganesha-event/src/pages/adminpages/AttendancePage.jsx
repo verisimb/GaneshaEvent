@@ -2,17 +2,29 @@ import React, { useState, useEffect, useRef } from 'react';
 import { QrCode, Search, Calendar, User, UserCheck, AlertCircle, X, ArrowLeft, MapPin } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
 import api from '../../lib/axios';
+import { useAdminEvents, useAdminAttendance } from '../../hooks/useAdmin';
+import { TableSkeleton } from '../../components/skeletons/TableSkeleton';
+import { useQueryClient } from '@tanstack/react-query';
 
 export const AttendancePage = () => {
-  const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [manualCode, setManualCode] = useState('');
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const queryClient = useQueryClient();
 
-  // Attendee List State
-  const [attendees, setAttendees] = useState([]);
-  const [loadingAttendees, setLoadingAttendees] = useState(false);
+    // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 500);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const { data: events, isLoading: loadingEvents } = useAdminEvents(debouncedSearch);
+  // Fetch all registrations for the event
+  const { data: allRegistrations, isLoading: loadingAttendees } = useAdminAttendance(selectedEvent?.id);
+  
+  // Filter for attendees only
+  const attendees = allRegistrations ? allRegistrations.filter(t => t.is_attended) : [];
 
   // Scan Result State
   const [scanResult, setScanResult] = useState(null); // { status: 'success'|'error'|'warning', message, user, ticket }
@@ -22,7 +34,6 @@ export const AttendancePage = () => {
   const scannerRef = useRef(null);
 
   useEffect(() => {
-    fetchEvents();
     return () => {
       // Cleanup scanner if component unmounts
       if (scannerRef.current) {
@@ -32,46 +43,11 @@ export const AttendancePage = () => {
         scannerRef.current.clear().catch(error => console.error("Failed to clear scanner", error));
       }
     };
-  }, [search]);
-
-  useEffect(() => {
-    if (selectedEvent) {
-      fetchAttendees(selectedEvent.id);
-    }
-  }, [selectedEvent]);
-
-  const fetchEvents = async () => {
-    try {
-      setLoading(true);
-      const response = await api.get(`/events?search=${search}`);
-      setEvents(response.data);
-    } catch (error) {
-      console.error('Error fetching events:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchAttendees = async (eventId) => {
-    try {
-      setLoadingAttendees(true);
-      const response = await api.get(`/events/${eventId}/tickets`);
-      // Filter only those who have attended OR show all with status
-      // We'll show all but prioritize attended ones or just a list of "Daftar Hadir" (attended ones)
-      // The request says "berisi list yang sudah absen" (list of those who have attended)
-      const attended = response.data.filter(t => t.is_attended);
-      setAttendees(attended);
-    } catch (error) {
-      console.error('Error fetching attendees:', error);
-    } finally {
-      setLoadingAttendees(false);
-    }
-  };
+  }, []);
 
   const handleSelectEvent = (event) => {
     setSelectedEvent(event);
     setScanResult(null);
-    setAttendees([]); // Reset while loading new ones
   }
 
   const handleBack = () => {
@@ -161,7 +137,7 @@ export const AttendancePage = () => {
 
       // Refresh attendee list if success
       if (resultStatus === 'success' || resultStatus === 'warning') {
-        fetchAttendees(selectedEvent.id);
+         queryClient.invalidateQueries(['admin-attendance', selectedEvent.id]);
       }
 
     } catch (error) {
@@ -212,15 +188,17 @@ export const AttendancePage = () => {
           />
         </div>
 
-        {loading ? (
-          <div className="text-center py-12 text-gray-500">Memuat event...</div>
-        ) : events.length === 0 ? (
+        {loadingEvents ? (
+           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <TableSkeleton rows={3} />
+           </div>
+        ) : events && events.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
             <p className="text-gray-500">Tidak ada event ditemukan</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {events.map((event) => (
+            {events && events.map((event) => (
               <div
                 key={event.id}
                 onClick={() => handleSelectEvent(event)}
@@ -368,14 +346,16 @@ export const AttendancePage = () => {
                 <h3 className="font-bold text-lg text-gray-800">Daftar Hadir</h3>
                 <p className="text-sm text-gray-500">Total: {attendees.length} Peserta</p>
               </div>
-              <button onClick={() => fetchAttendees(selectedEvent.id)} className="p-2 hover:bg-gray-200 rounded-full transition-colors">
+              <button onClick={() => queryClient.invalidateQueries(['admin-attendance', selectedEvent.id])} className="p-2 hover:bg-gray-200 rounded-full transition-colors">
                 <Search className="w-5 h-5 text-gray-500" />
               </button>
             </div>
 
             <div className="flex-1 overflow-y-auto p-0">
               {loadingAttendees ? (
-                <div className="p-12 text-center text-gray-400">Memuat data peserta...</div>
+                <div className="p-6">
+                    <TableSkeleton rows={5} />
+                </div>
               ) : attendees.length === 0 ? (
                 <div className="p-12 text-center">
                   <UserCheck className="w-16 h-16 text-gray-200 mx-auto mb-4" />

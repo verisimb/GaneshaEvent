@@ -1,22 +1,10 @@
-import { useEffect } from 'react';
 import { Award, Download, Calendar } from 'lucide-react';
-import { useEventStore } from '../../store/useEventStore';
+import { useMyCertificates } from '../../hooks/useTickets';
 import api from '../../lib/axios';
+import { TicketSkeleton } from '../../components/skeletons/TicketSkeleton';
 
 export const MyCertificatesPage = () => {
-    const { tickets, fetchMyTickets, isLoading } = useEventStore();
-
-    useEffect(() => {
-        fetchMyTickets();
-    }, [fetchMyTickets]);
-
-    // Filter tickets that are eligible for certificates:
-    // 1. Attended (is_attended = true)
-    // 2. Event is completed (is_completed = true)
-    // 3. Status is confirmed (just to be safe)
-    const myCertificates = tickets.filter(ticket => 
-        ticket.event && ticket.is_attended && ticket.event.is_completed && ticket.status === 'dikonfirmasi'
-    );
+    const { data: myCertificates, isLoading } = useMyCertificates();
 
     const handleDownloadCertificate = async (ticketId, eventTitle) => {
         try {
@@ -60,8 +48,10 @@ export const MyCertificatesPage = () => {
       </p>
 
       {isLoading ? (
-        <div className="text-center py-12">Memuat sertifikat...</div>
-      ) : myCertificates.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(3)].map((_, i) => <TicketSkeleton key={i} />)}
+        </div>
+      ) : myCertificates && myCertificates.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {myCertificates.map(({ id, event }) => (
              event && (
