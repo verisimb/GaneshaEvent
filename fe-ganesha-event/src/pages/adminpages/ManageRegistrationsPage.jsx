@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Search, Calendar, MapPin, ArrowLeft, Check, X, Eye } from 'lucide-react';
 import api from '../../lib/axios';
+import Swal from 'sweetalert2';
+import toast from 'react-hot-toast';
 
 export const ManageRegistrationsPage = () => {
   const [events, setEvents] = useState([]);
@@ -42,23 +44,38 @@ export const ManageRegistrationsPage = () => {
       setRegistrations(response.data);
     } catch (error) {
       console.error('Error fetching registrations:', error);
-      alert('Gagal mengambil data pendaftar');
+      toast.error('Gagal mengambil data pendaftar');
     } finally {
       setLoadingRegs(false);
     }
   };
 
   const handleUpdateStatus = async (ticketId, newStatus) => {
-    if (!window.confirm(`Apakah Anda yakin ingin mengubah status menjadi ${newStatus}?`)) return;
+    const result = await Swal.fire({
+      title: 'Ubah Status?',
+      text: `Apakah Anda yakin ingin mengubah status menjadi ${newStatus}?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#6C1022',
+      confirmButtonText: 'Ya, Ubah',
+      cancelButtonText: 'Batal',
+      customClass: {
+        popup: 'rounded-2xl',
+        confirmButton: 'font-bold px-6 py-2 rounded-xl',
+        cancelButton: 'px-6 py-2 rounded-xl'
+      }
+    });
 
-    try {
-      await api.put(`/tickets/${ticketId}/status`, { status: newStatus });
-      // Refresh list
-      fetchRegistrations(selectedEvent.id);
-      alert('Status berhasil diperbarui');
-    } catch (error) {
-      console.error('Error updating status:', error);
-      alert('Gagal memperbarui status');
+    if (result.isConfirmed) {
+      try {
+        await api.put(`/tickets/${ticketId}/status`, { status: newStatus });
+        // Refresh list
+        fetchRegistrations(selectedEvent.id);
+        toast.success('Status berhasil diperbarui');
+      } catch (error) {
+        console.error('Error updating status:', error);
+        toast.error('Gagal memperbarui status');
+      }
     }
   };
 
@@ -125,7 +142,8 @@ export const ManageRegistrationsPage = () => {
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-left">
+        {/* Desktop Table */}
+        <table className="w-full text-left hidden md:table">
           <thead className="bg-gray-50 text-gray-600 text-sm uppercase tracking-wider">
             <tr>
               <th className="px-6 py-4 font-semibold">Nama Peserta</th>
@@ -203,6 +221,64 @@ export const ManageRegistrationsPage = () => {
             )}
           </tbody>
         </table>
+
+        {/* Mobile Cards */}
+        <div className="md:hidden space-y-4 p-4">
+            {loadingRegs ? (
+              <div className="text-center text-gray-500 py-8">Memuat data...</div>
+            ) : registrations.length === 0 ? (
+              <div className="text-center text-gray-500 py-8">Belum ada pendaftar.</div>
+            ) : (
+              registrations.map(ticket => (
+                <div key={ticket.id} className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col gap-3">
+                   <div className="flex justify-between items-start">
+                      <div>
+                         <p className="font-bold text-gray-900">{ticket.user?.name}</p>
+                         <p className="text-xs text-gray-500">{ticket.user?.email}</p>
+                      </div>
+                      <span className={`inline-flex px-2 py-1 rounded-md text-xs font-semibold
+                        ${ticket.status === 'dikonfirmasi' ? 'bg-green-100 text-green-700' :
+                          ticket.status === 'ditolak' ? 'bg-red-100 text-red-700' :
+                            'bg-yellow-100 text-yellow-700'}`}>
+                        {ticket.status === 'dikonfirmasi' ? 'Confirmed' : ticket.status === 'ditolak' ? 'Rejected' : 'Pending'}
+                      </span>
+                   </div>
+                   
+                   <div className="flex items-center justify-between text-sm text-gray-600 border-t border-gray-50 pt-2">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-3 h-3 text-gray-400" />
+                        {new Date(ticket.created_at).toLocaleDateString()}
+                      </div>
+                      {selectedEvent.price > 0 && ticket.payment_proof && (
+                          <button
+                          onClick={() => setPreviewImage(ticket.payment_proof)}
+                          className="text-primary text-xs font-medium flex items-center gap-1"
+                        >
+                          <Eye className="w-3 h-3" /> Bukti Bayar
+                        </button>
+                      )}
+                   </div>
+
+                   {ticket.status === 'menunggu_konfirmasi' && (
+                     <div className="grid grid-cols-2 gap-3 pt-2">
+                        <button
+                            onClick={() => handleUpdateStatus(ticket.id, 'dikonfirmasi')}
+                            className="py-2 bg-green-50 text-green-700 rounded-lg text-sm font-medium hover:bg-green-100 flex items-center justify-center gap-2"
+                        >
+                           <Check className="w-4 h-4" /> Terima
+                        </button>
+                        <button
+                            onClick={() => handleUpdateStatus(ticket.id, 'ditolak')}
+                            className="py-2 bg-red-50 text-red-700 rounded-lg text-sm font-medium hover:bg-red-100 flex items-center justify-center gap-2"
+                        >
+                           <X className="w-4 h-4" /> Tolak
+                        </button>
+                     </div>
+                   )}
+                </div>
+              ))
+            )}
+        </div>
       </div>
     </div>
   );

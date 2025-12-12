@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
 import { clsx } from 'clsx';
-import { Calendar, Users, QrCode, Menu, X } from 'lucide-react';
+import { Calendar, Users, QrCode, Menu, X, Home } from 'lucide-react';
 import { useEventStore } from '../store/useEventStore';
 import logo from '../assets/GaneshaEventLogo.png';
 
@@ -41,7 +41,9 @@ export const AdminLayout = () => {
       >
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
           <div className="flex items-center gap-2">
-             <img src={logo} alt="Ganesha Event" className="h-10 w-auto" />
+             <Link to="/admin">
+                <img src={logo} alt="Ganesha Event" className="h-10 w-auto" />
+             </Link>
           </div>
           <button onClick={toggleSidebar} className="lg:hidden text-gray-500 hover:text-gray-700">
             <X size={24} />
@@ -89,6 +91,18 @@ export const AdminLayout = () => {
               <QrCode size={20} />
               Absensi
             </NavLink>
+
+            <div className="pt-4 mt-4 border-t border-gray-100">
+                <Link 
+                to="/" 
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                >
+                <div className="flex items-center justify-center w-5 h-5">
+                   <Home size={20} />
+                </div>
+                Halaman Utama User
+                </Link>
+            </div>
           </div>
         </nav>
       </aside>
@@ -98,7 +112,9 @@ export const AdminLayout = () => {
         {/* Mobile Header */}
         <header className="lg:hidden flex items-center justify-between h-16 px-4 bg-white border-b border-gray-200">
           <div className="flex items-center gap-2">
-             <img src={logo} alt="Ganesha Event" className="h-10 w-auto" />
+             <Link to="/admin">
+                <img src={logo} alt="Ganesha Event" className="h-10 w-auto" />
+             </Link>
           </div>
           <button onClick={toggleSidebar} className="p-2 -mr-2 text-gray-600 hover:bg-gray-100 rounded-md">
             <Menu size={24} />

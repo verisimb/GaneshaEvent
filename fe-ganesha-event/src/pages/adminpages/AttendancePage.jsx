@@ -383,7 +383,9 @@ export const AttendancePage = () => {
                   <p className="text-gray-400 text-sm mt-1">Scan QR code untuk memulai check-in</p>
                 </div>
               ) : (
-                <table className="w-full text-left">
+                <>
+                {/* Desktop Table */}
+                <table className="w-full text-left hidden md:table">
                   <thead className="bg-gray-50 text-gray-500 text-xs uppercase font-semibold">
                     <tr>
                       <th className="px-6 py-4">Peserta</th>
@@ -419,6 +421,32 @@ export const AttendancePage = () => {
                     ))}
                   </tbody>
                 </table>
+
+                {/* Mobile Cards */}
+                <div className="md:hidden divide-y divide-gray-100">
+                  {attendees.map((item, idx) => (
+                      <div key={idx} className="p-4 flex items-center justify-between">
+                          <div className="flex items-center gap-3 overflow-hidden">
+                             <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-blue-400 flex items-center justify-center text-white font-bold text-sm shadow-sm shrink-0">
+                                {item.user.name.charAt(0)}
+                             </div>
+                             <div className="min-w-0">
+                                <p className="font-semibold text-gray-900 truncate">{item.user.name}</p>
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2">
+                                   <p className="text-xs text-gray-500 truncate">{item.user.email}</p>
+                                   <span className="text-[10px] font-mono bg-gray-100 px-1 rounded text-gray-400 border border-gray-200 w-fit">{item.ticket_code}</span>
+                                </div>
+                             </div>
+                          </div>
+                          <div className="shrink-0 pl-2">
+                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-green-100 text-green-700 border border-green-200">
+                                <UserCheck className="w-3 h-3" /> Hadir
+                            </span>
+                          </div>
+                      </div>
+                  ))}
+                </div>
+                </>
               )}
             </div>
           </div>

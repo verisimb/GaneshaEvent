@@ -3,40 +3,36 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Calendar, MapPin, ArrowLeft, Share2, Copy, Check } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { useEventStore } from '../../store/useEventStore';
+import { useEvent } from '../../hooks/useEvents';
+import { EventDetailSkeleton } from '../../components/skeletons/EventDetailSkeleton';
+import Swal from 'sweetalert2';
+import toast from 'react-hot-toast';
 
 export const EventDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getEventById, registerEvent, user, isLoading } = useEventStore();
-  const [event, setEvent] = useState(null);
-  const [loadingEvent, setLoadingEvent] = useState(true);
+  const { registerEvent, user, isLoading: isRegistering } = useEventStore();
+  const { data: event, isLoading: loadingEvent, isError } = useEvent(id);
+  
   const [copied, setCopied] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
 
+  // Form State
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
-    nim: user?.nim || '',
+    name: '',
+    email: '',
+    phone: '',
+    nim: '',
     paymentProof: null,
   });
-
-  useEffect(() => {
-    const loadEvent = async () => {
-      const data = await getEventById(id);
-      setEvent(data);
-      setLoadingEvent(false);
-    };
-    loadEvent();
-  }, [id, getEventById]);
 
   // Update form if user data changes (e.g. after fresh login)
   useEffect(() => {
     if (user) {
         setFormData(prev => ({
             ...prev,
-            name: user.name,
-            email: user.email,
+            name: user.name || '',
+            email: user.email || '',
             phone: user.phone || '',
             nim: user.nim || ''
         }));
@@ -54,11 +50,13 @@ export const EventDetailPage = () => {
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   };
 
+  // 1. Loading State
   if (loadingEvent) {
-    return <div className="text-center py-12">Memuat event...</div>;
+    return <EventDetailSkeleton />;
   }
 
-  if (!event) {
+  // 2. Error State
+  if (isError || !event) {
     return (
       <div className="text-center py-12">
         <h2 className="text-2xl font-bold text-gray-900">Event tidak ditemukan</h2>
@@ -69,6 +67,7 @@ export const EventDetailPage = () => {
     );
   }
 
+  // 3. Completed Event State
   // Hide completed events from detail view
   if (event.is_completed) {
       return (
@@ -85,20 +84,30 @@ export const EventDetailPage = () => {
     e.preventDefault();
 
     if (!formData.name || !formData.email || !formData.nim || !formData.phone) {
-      alert('Mohon lengkapi data diri anda di profil atau form ini');
+      toast.error('Mohon lengkapi data diri anda di profil atau form ini');
     }
     
     if (event.price > 0 && !formData.paymentProof) {
-        alert('Mohon upload bukti pembayaran untuk event berbayar.');
+        toast.error('Mohon upload bukti pembayaran untuk event berbayar.');
         return;
     }
     
     const success = await registerEvent(event.id, formData.paymentProof);
     if (success) {
-        alert('Pendaftaran berhasil! Silakan tunggu konfirmasi admin.');
+        await Swal.fire({
+          title: 'Pendaftaran Berhasil!',
+          text: 'Silakan tunggu konfirmasi admin.',
+          icon: 'success',
+          confirmButtonText: 'Lihat Tiket',
+          confirmButtonColor: '#6C1022',
+          customClass: {
+            popup: 'rounded-2xl',
+            confirmButton: 'font-bold px-6 py-2 rounded-xl'
+          }
+        });
         navigate('/tickets');
     } else {
-        alert('Pendaftaran gagal. Pastikan anda belum terdaftar atau coba lagi nanti.');
+        toast.error('Pendaftaran gagal. Pastikan anda belum terdaftar atau coba lagi nanti.');
     }
   };
 
@@ -164,65 +173,67 @@ export const EventDetailPage = () => {
         <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100">
           <div className="relative h-64 md:h-96">
             <img src={event.image_url || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87'} alt={event.title} className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-8">
-               <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                  <div>
-                    <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">{event.title}</h1>
-                    <p className="text-white/90 text-lg">{event.organizer}</p>
-                  </div>
-                  
-                  {/* Share Button & Dropdown */}
-                  <div className="relative">
-                      <button 
-                        onClick={() => {
-                            if (navigator.share) {
-                                navigator.share({
-                                    title: event.title,
-                                    text: `Cek event keren ini: ${event.title} di Ganesha Event!`,
-                                    url: window.location.href,
-                                }).catch(console.error);
-                            } else {
-                                setShowShareMenu(!showShareMenu);
-                            }
-                        }}
-                        className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors"
-                      >
-                         <Share2 size={16} />
-                         Bagikan
-                      </button>
-
-                      {/* Desktop Fallback Dropdown */}
-                      {showShareMenu && (
-                        <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50 animate-in fade-in zoom-in-95 duration-200">
-                            <button 
-                                onClick={() => {
-                                    handleWhatsAppShare();
-                                    setShowShareMenu(false);
-                                }}
-                                className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                            >
-                                <Share2 size={16} className="text-green-500" />
-                                WhatsApp
-                            </button>
-                            <div className="border-b border-gray-100"></div>
-                            <button 
-                                onClick={() => {
-                                    handleCopyLink();
-                                    setShowShareMenu(false);
-                                }}
-                                className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                            >
-                                {copied ? <Check size={16} className="text-primary" /> : <Copy size={16} className="text-gray-400" />}
-                                {copied ? 'Tersalin' : 'Salin Link'}
-                            </button>
-                        </div>
-                      )}
-                  </div>
-               </div>
-            </div>
           </div>
 
-          <div className="p-8 flex flex-col gap-10">
+          <div className="p-4 md:p-8 flex flex-col gap-8 md:gap-10">
+             
+             {/* Header Section: Title, Organizer, Share */}
+             <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 border-b border-gray-100 pb-6">
+                <div className="space-y-2">
+                   <h1 className="text-3xl md:text-4xl font-bold text-gray-900">{event.title}</h1>
+                   <p className="text-gray-600 text-lg flex items-center gap-2">
+                      Diselenggarakan oleh <span className="font-bold text-primary">{event.organizer}</span>
+                   </p>
+                </div>
+
+                {/* Share Button & Dropdown */}
+                <div className="relative shrink-0 mt-2 md:mt-0">
+                    <button 
+                      onClick={() => {
+                          if (navigator.share) {
+                              navigator.share({
+                                  title: event.title,
+                                  text: `Cek event keren ini: ${event.title} di Ganesha Event!`,
+                                  url: window.location.href,
+                              }).catch(console.error);
+                          } else {
+                              setShowShareMenu(!showShareMenu);
+                          }
+                      }}
+                      className="bg-gray-100 hover:bg-gray-200 text-gray-900 px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors border border-gray-200"
+                    >
+                       <Share2 size={16} />
+                       Bagikan
+                    </button>
+
+                    {/* Desktop Fallback Dropdown */}
+                    {showShareMenu && (
+                      <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50 animate-in fade-in zoom-in-95 duration-200">
+                          <button 
+                              onClick={() => {
+                                  handleWhatsAppShare();
+                                  setShowShareMenu(false);
+                              }}
+                              className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                          >
+                              <Share2 size={16} className="text-green-500" />
+                              WhatsApp
+                          </button>
+                          <div className="border-b border-gray-100"></div>
+                          <button 
+                              onClick={() => {
+                                  handleCopyLink();
+                                  setShowShareMenu(false);
+                              }}
+                              className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                          >
+                              {copied ? <Check size={16} className="text-primary" /> : <Copy size={16} className="text-gray-400" />}
+                              {copied ? 'Tersalin' : 'Salin Link'}
+                          </button>
+                      </div>
+                    )}
+                </div>
+             </div>
              <div className="space-y-6">
                 <section>
                    <h2 className="text-xl font-bold text-gray-900 mb-4">Tentang Event</h2>
@@ -331,20 +342,20 @@ export const EventDetailPage = () => {
                       
                       <button 
                         type="submit"
-                        disabled={isLoading}
+                        disabled={isRegistering}
                         className="w-full md:w-auto px-8 bg-primary hover:bg-[#5a0d1c] text-white font-bold py-3 rounded-xl transition-all transform active:scale-95 shadow-md hover:shadow-lg disabled:opacity-50"
                       >
-                        {isLoading ? 'Memproses...' : 'Beli Tiket'}
+                        {isRegistering ? 'Memproses...' : 'Beli Tiket'}
                       </button>
                    </form>
                    ) : (
-                     <div className="bg-gray-50 border border-gray-100 rounded-xl p-8 text-center flex flex-col items-center gap-4">
+                     <div className="bg-gray-50 border border-gray-100 rounded-xl p-6 text-center flex flex-col items-center gap-3">
                         <p className="text-gray-600">Anda harus login terlebih dahulu untuk mendaftar di event ini.</p>
                         <button 
                             onClick={() => navigate('/login')}
-                            className="w-full md:w-auto px-8 bg-primary hover:bg-[#5a0d1c] text-white font-bold py-3 rounded-xl transition-all shadow-md hover:shadow-lg"
+                            className="w-full sm:w-auto px-6 bg-primary hover:bg-[#5a0d1c] text-white font-bold py-2.5 rounded-xl transition-all shadow-md hover:shadow-lg"
                         >
-                            Masuk untuk mendaftar kegiatan
+                            Masuk untuk Mendaftar
                         </button>
                      </div>
                    )}

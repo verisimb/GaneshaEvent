@@ -3,14 +3,21 @@ import { Search } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { EventCard } from '../../components/EventCard';
 import { useEventStore } from '../../store/useEventStore';
+import { useEvents } from '../../hooks/useEvents';
+import { EventCardSkeleton } from '../../components/skeletons/EventCardSkeleton';
 
 export const HomePage = () => {
   const [searchQuery, setSearchQuery] = React.useState('');
-  const { events, fetchEvents, isLoading, user } = useEventStore();
-
+  const [debouncedSearch, setDebouncedSearch] = React.useState('');
+  const { user } = useEventStore();
+  
+  // Debounce search
   useEffect(() => {
-    fetchEvents(searchQuery);
-  }, [fetchEvents, searchQuery]);
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const { data: events, isLoading, isError } = useEvents(debouncedSearch);
 
   return (
     <div className="space-y-8">
@@ -33,7 +40,6 @@ export const HomePage = () => {
               <p className="text-base md:text-xl text-white/90 mb-6 md:mb-8 leading-relaxed">
                  Temukan berbagai seminar, workshop, dan kegiatan mahasiswa menarik. Daftar mudah, dapatkan tiket instan, dan unduh sertifikat digital dalam satu aplikasi.
               </p>
-              {/* Stats removed as per request */}
            </div>
            
            {/* Abstract Decoration */}
@@ -63,8 +69,11 @@ export const HomePage = () => {
       {/* Events Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {isLoading ? (
-           <p className="text-center col-span-full">Memuat event...</p>
-        ) : events.length > 0 ? (
+           // Show 6 Skeletons while loading
+           [...Array(6)].map((_, i) => <EventCardSkeleton key={i} />)
+        ) : isError ? (
+           <p className="text-center col-span-full text-red-500">Gagal memuat event. Silakan coba lagi.</p>
+        ) : events && events.length > 0 ? (
           events.map((event) => (
             <EventCard key={event.id} event={event} />
           ))

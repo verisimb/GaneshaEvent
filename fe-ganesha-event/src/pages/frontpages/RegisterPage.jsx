@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useEventStore } from '../../store/useEventStore';
 import { Helmet } from 'react-helmet-async';
+import Swal from 'sweetalert2';
 import logo from '../../assets/GaneshaEventLogo.png';
 
 export const RegisterPage = () => {
@@ -22,7 +23,20 @@ export const RegisterPage = () => {
     e.preventDefault();
     const success = await register(formData);
     if (success) {
-      alert('Registrasi berhasil! Silakan login dengan akun baru Anda.');
+      await Swal.fire({
+        title: 'Registrasi Berhasil!',
+        text: 'Silakan login dengan akun baru Anda.',
+        icon: 'success',
+        confirmButtonText: 'Login Sekarang',
+        confirmButtonColor: '#6C1022',
+        width: '32rem',
+        padding: '2rem',
+        customClass: {
+          popup: 'rounded-2xl',
+          title: 'text-2xl font-bold text-gray-900',
+          confirmButton: 'font-bold px-6 py-3 rounded-xl'
+        }
+      });
       navigate('/login');
     }
   };
@@ -35,7 +49,9 @@ export const RegisterPage = () => {
       <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-xl border border-gray-100">
           <div className="flex flex-col items-center">
-            <img className="h-12 w-auto mb-6" src={logo} alt="Ganesha Event" />
+            <Link to="/">
+              <img className="h-12 w-auto mb-6" src={logo} alt="Ganesha Event" />
+            </Link>
             <h2 className="text-3xl font-extrabold text-gray-900 text-center">
               Buat Akun Baru
             </h2>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate, NavLink, Outlet } from 'react-router-dom';
-import { Home, Ticket, Menu, X, Award, LogOut, LogIn } from 'lucide-react';
+import { useNavigate, NavLink, Outlet, Link } from 'react-router-dom';
+import { Home, Ticket, Menu, X, Award, LogOut, LogIn, LayoutDashboard } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useEventStore } from '../store/useEventStore';
 import { Header } from '../components/Header';
@@ -53,7 +53,9 @@ export const MainLayout = () => {
       >
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
           <div className="flex items-center gap-2">
-             <img src={logo} alt="Ganesha Event" className="h-10 w-auto" />
+             <Link to="/">
+                <img src={logo} alt="Ganesha Event" className="h-10 w-auto" />
+             </Link>
           </div>
           <button onClick={toggleSidebar} className="lg:hidden text-gray-500 hover:text-gray-700">
             <X size={24} />
@@ -111,6 +113,16 @@ export const MainLayout = () => {
           <div className="pt-4 mt-4 border-t border-gray-100">
             {user ? (
               <div className="space-y-4">
+                 {user.role === 'admin' && (
+                    <NavLink
+                        to="/admin"
+                        onClick={() => setIsSidebarOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors mb-2"
+                    >
+                        <LayoutDashboard size={20} />
+                        Admin Dashboard
+                    </NavLink>
+                 )}
                  <div className="px-4 py-2">
                     <p className="text-sm font-medium text-gray-900">Halo, {user.name}</p>
                     <p className="text-xs text-gray-500 truncate">{user.email}</p>
@@ -149,7 +161,9 @@ export const MainLayout = () => {
         {/* Mobile Header */}
         <header className="lg:hidden flex items-center justify-between h-16 px-4 bg-white border-b border-gray-200">
           <div className="flex items-center gap-2">
-             <img src={logo} alt="Ganesha Event" className="h-10 w-auto" />
+             <Link to="/">
+                <img src={logo} alt="Ganesha Event" className="h-10 w-auto" />
+             </Link>
           </div>
           <button onClick={toggleSidebar} className="p-2 -mr-2 text-gray-600 hover:bg-gray-100 rounded-md">
             <Menu size={24} />

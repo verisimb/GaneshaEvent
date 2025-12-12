@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Plus, MapPin, Search, Edit, Trash, X, Upload, DollarSign, Image as ImageIcon, ExternalLink, QrCode, CheckCircle, FileText } from 'lucide-react';
 import api from '../../lib/axios';
+import Swal from 'sweetalert2';
+import toast from 'react-hot-toast';
 
 export const ManageEventsPage = () => {
   const [events, setEvents] = useState([]);
@@ -42,7 +44,7 @@ export const ManageEventsPage = () => {
       setEvents(response.data);
     } catch (error) {
       console.error('Error fetching events:', error);
-      alert('Gagal mengambil data event');
+      toast.error('Gagal mengambil data event');
     } finally {
       setLoading(false);
     }
@@ -99,14 +101,31 @@ export const ManageEventsPage = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Apakah Anda yakin ingin menghapus event ini?')) return;
-    try {
-      await api.delete(`/events/${id}`);
-      fetchEvents();
-      alert('Event berhasil dihapus');
-    } catch (error) {
-      console.error('Error deleting event:', error);
-      alert('Gagal menghapus event');
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Event yang dihapus tidak dapat dikembalikan!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
+      customClass: {
+        popup: 'rounded-2xl',
+        confirmButton: 'font-bold px-6 py-2 rounded-xl',
+        cancelButton: 'px-6 py-2 rounded-xl'
+      }
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await api.delete(`/events/${id}`);
+        fetchEvents();
+        toast.success('Event berhasil dihapus');
+      } catch (error) {
+        console.error('Error deleting event:', error);
+        toast.error('Gagal menghapus event');
+      }
     }
   };
 
@@ -115,7 +134,7 @@ export const ManageEventsPage = () => {
 
     // Validation: If Paid, ensure Price > 0
     if (formData.isPaid && formData.price <= 0) {
-      alert('Harga harus lebih dari 0 untuk event berbayar');
+      toast.error('Harga harus lebih dari 0 untuk event berbayar');
       return;
     }
 
@@ -157,35 +176,52 @@ export const ManageEventsPage = () => {
         await api.post(`/events/${currentEvent.id}`, payload, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
-        alert('Event berhasil diperbarui');
+        toast.success('Event berhasil diperbarui');
       } else {
         await api.post('/events', payload, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
-        alert('Event berhasil dibuat');
+        toast.success('Event berhasil dibuat');
       }
       setIsModalOpen(false);
       fetchEvents();
       resetForm();
     } catch (error) {
       console.error('Error saving event:', error);
-      alert('Terjadi kesalahan saat menyimpan event');
+      toast.error('Terjadi kesalahan saat menyimpan event');
     }
   };
 
   const handleCompleteEvent = async (event) => {
-      if (!window.confirm(`Tandai event "${event.title}" sebagai Selesai? Sertifikat akan dapat didownload oleh peserta.`)) return;
-      try {
-          const payload = new FormData();
-          payload.append('_method', 'PUT');
-          payload.append('is_completed', 1);
-          
-          await api.post(`/events/${event.id}`, payload);
-          fetchEvents();
-          alert('Event berhasil diselesaikan!');
-      } catch (error) {
-          console.error('Error completing event', error);
-          alert('Gagal menyelesaikan event');
+      const result = await Swal.fire({
+        title: 'Selesaikan Event?',
+        text: `Tandai event "${event.title}" sebagai Selesai? Sertifikat akan dapat didownload oleh peserta.`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#6C1022',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ya, Selesaikan!',
+        cancelButtonText: 'Batal',
+        customClass: {
+          popup: 'rounded-2xl',
+          confirmButton: 'font-bold px-6 py-2 rounded-xl',
+          cancelButton: 'px-6 py-2 rounded-xl'
+        }
+      });
+
+      if (result.isConfirmed) {
+          try {
+              const payload = new FormData();
+              payload.append('_method', 'PUT');
+              payload.append('is_completed', 1);
+              
+              await api.post(`/events/${event.id}`, payload);
+              fetchEvents();
+              toast.success('Event berhasil diselesaikan!');
+          } catch (error) {
+              console.error('Error completing event', error);
+              toast.error('Gagal menyelesaikan event');
+          }
       }
   };
 
