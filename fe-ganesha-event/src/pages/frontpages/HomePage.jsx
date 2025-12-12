@@ -23,9 +23,9 @@ export const HomePage = () => {
     <div className="space-y-8">
       <Helmet>
         <title>Ganesha Event - Platform Event Kampus Terlengkap</title>
-        <meta name="description" content="Temukan berbagai seminar, workshop, dan kegiatan mahasiswa menarik di Universitas Ganesha. Daftar mudah dan dapatkan sertifikat digital." />
+        <meta name="description" content="Temukan berbagai seminar, workshop, dan kegiatan mahasiswa menarik di Universitas Pendidikan Ganesha. Daftar mudah dan dapatkan sertifikat digital." />
         <meta property="og:title" content="Ganesha Event - Platform Event Kampus Terlengkap" />
-        <meta property="og:description" content="Temukan berbagai seminar, workshop, dan kegiatan mahasiswa menarik di Universitas Ganesha." />
+        <meta property="og:description" content="Temukan berbagai seminar, workshop, dan kegiatan mahasiswa menarik di Universitas Pendidikan Ganesha." />
         <meta property="og:image" content="/logo.png" />
         <meta property="og:type" content="website" />
       </Helmet>
