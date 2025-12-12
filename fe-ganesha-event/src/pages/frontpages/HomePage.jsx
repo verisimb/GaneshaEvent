@@ -26,7 +26,7 @@ export const HomePage = () => {
         <meta name="description" content="Temukan berbagai seminar, workshop, dan kegiatan mahasiswa menarik di Universitas Ganesha. Daftar mudah dan dapatkan sertifikat digital." />
         <meta property="og:title" content="Ganesha Event - Platform Event Kampus Terlengkap" />
         <meta property="og:description" content="Temukan berbagai seminar, workshop, dan kegiatan mahasiswa menarik di Universitas Ganesha." />
-        <meta property="og:image" content="/og-image.jpg" />
+        <meta property="og:image" content="/logo.png" />
         <meta property="og:type" content="website" />
       </Helmet>
 

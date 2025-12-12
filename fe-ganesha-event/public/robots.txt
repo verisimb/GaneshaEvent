@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://ganesha-event.com/sitemap.xml
+Sitemap: https://ganesha-event.vercel.app/sitemap.xml
