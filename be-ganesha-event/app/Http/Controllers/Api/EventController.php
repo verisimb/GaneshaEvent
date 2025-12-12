@@ -30,7 +30,12 @@ class EventController extends Controller
 
     public function show($id)
     {
-        return response()->json(Event::findOrFail($id));
+        if (is_numeric($id)) {
+            $event = Event::findOrFail($id);
+        } else {
+            $event = Event::where('slug', $id)->firstOrFail();
+        }
+        return response()->json($event);
     }
 
     public function store(Request $request)
