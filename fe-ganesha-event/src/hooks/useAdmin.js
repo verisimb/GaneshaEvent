@@ -20,7 +20,7 @@ export const useAdminRegistrations = (eventId) => {
         queryKey: ['admin-registrations', eventId],
         queryFn: async () => {
             if (!eventId) return [];
-            const response = await api.get(`/events/${eventId}/registrations`);
+            const response = await api.get(`/events/${eventId}/tickets`);
             return response.data;
         },
         enabled: !!eventId, // Only fetch if eventId is selected
@@ -33,9 +33,9 @@ export const useAdminAttendance = (eventId) => {
         queryKey: ['admin-attendance', eventId],
         queryFn: async () => {
             if (!eventId) return [];
-            // Reusing registrations endpoint but filtering for attended might be better on backend
+            // Reusing tickets endpoint but filtering for attended might be better on backend
             // For now, let's assume we fetch all and filter client side or usage specific endpoint
-            const response = await api.get(`/events/${eventId}/registrations`); 
+            const response = await api.get(`/events/${eventId}/tickets`); 
             return response.data;
         },
         enabled: !!eventId,
