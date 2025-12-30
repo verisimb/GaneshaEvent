@@ -11,7 +11,7 @@
 
 **Platform modern untuk manajemen event kampus dengan sistem tiket QR Code dan sertifikat digital otomatis**
 
-[Demo Live](https://ganesha-event.vercel.app) · [API Docs](#-api-endpoints) · [Report Bug](https://github.com/verisimb/GaneshaEvent/issues)
+[Demo Live](https://ganesha-event.vercel.app) · [API Docs](#-api-endpoints)
 
 </div>
 
@@ -23,10 +23,9 @@
 - [Fitur Utama](#-fitur-utama)
 - [Tech Stack](#️-tech-stack)
 - [Quick Start](#-quick-start)
-- [Deployment](#-deployment)
 - [API Endpoints](#-api-endpoints)
-- [Testing](#-testing)
-- [Dokumentasi](#-dokumentasi)
+- [Deployment](#-deployment)
+- [Team](#-team)
 
 ---
 
@@ -38,19 +37,7 @@
 - ✅ Scan QR untuk absensi
 - 🏆 Download sertifikat digital otomatis
 
-Aplikasi ini dikembangkan sebagai tugas akhir mata kuliah **Pengembangan Aplikasi Web** dengan arsitektur **REST API** (Laravel) dan **SPA** (React).
-
-### 🎨 Screenshots
-
-<details>
-<summary>Lihat Screenshots</summary>
-
-- **Home Page**: Landing page dengan daftar event
-- **Event Detail**: Informasi lengkap event dan form pendaftaran
-- **Dashboard User**: Tiket saya dan sertifikat
-- **Admin Panel**: Kelola event, verifikasi pembayaran, scan QR
-
-</details>
+Aplikasi ini dikembangkan sebagai tugas akhir mata kuliah **Pemrograman Web** dengan arsitektur **REST API** (Laravel) dan **SPA** (React).
 
 ---
 
@@ -74,7 +61,6 @@ Aplikasi ini dikembangkan sebagai tugas akhir mata kuliah **Pengembangan Aplikas
 | **Verifikasi Pembayaran** | Approve/reject pendaftaran event berbayar |
 | **QR Scanner** | Scan tiket peserta untuk absensi hari-H (dengan kamera atau input manual) |
 | **Generate Sertifikat** | Upload template, sistem otomatis cetak nama peserta |
-| **Dashboard Analytics** | Statistik event, pendaftar, dan kehadiran |
 
 ---
 
@@ -86,7 +72,6 @@ Aplikasi ini dikembangkan sebagai tugas akhir mata kuliah **Pengembangan Aplikas
 - **Database**: MySQL 8.0
 - **Authentication**: Laravel Sanctum (Token-based)
 - **Image Processing**: Intervention Image 3.11 (GD Driver)
-- **Testing**: PHPUnit 11.5
 
 ### Frontend
 - **Framework**: React 18.3.1
@@ -96,14 +81,10 @@ Aplikasi ini dikembangkan sebagai tugas akhir mata kuliah **Pengembangan Aplikas
 - **Routing**: React Router DOM 7.10
 - **HTTP Client**: Axios 1.13 + TanStack Query 5.90
 - **QR Code**: html5-qrcode 2.3, qrcode.react 4.2
-- **UI Components**: Lucide React, SweetAlert2, React Hot Toast
-- **SEO**: React Helmet Async 2.0
-- **Analytics**: React GA4 2.1
 
-### DevOps & Deployment
+### Deployment
 - **Backend**: Railway (https://ganeshaevent-production.up.railway.app)
 - **Frontend**: Vercel (https://ganesha-event.vercel.app)
-- **CI/CD**: GitHub Actions (auto-deploy on push)
 - **Database**: Railway MySQL
 
 ---
@@ -118,9 +99,6 @@ Aplikasi ini dikembangkan sebagai tugas akhir mata kuliah **Pengembangan Aplikas
 - Composer
 - Node.js >= 18
 - MySQL >= 8.0
-
-# Optional
-- Git
 ```
 
 ### 1. Clone Repository
@@ -157,6 +135,24 @@ php artisan serve
 
 Backend akan berjalan di: **http://localhost:8000**
 
+**Environment Variables (.env.example):**
+```env
+APP_NAME="Ganesha Event"
+APP_URL=http://localhost:8000
+FORCE_HTTPS=false
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=ganesha_event
+DB_USERNAME=root
+DB_PASSWORD=
+
+# For production (Railway)
+# APP_URL=https://your-app.railway.app
+# FORCE_HTTPS=true
+```
+
 ### 3. Setup Frontend (React)
 
 ```bash
@@ -167,13 +163,18 @@ npm install
 
 # Setup environment
 cp .env.example .env
-# Edit .env: set VITE_API_URL=http://localhost:8000
+# Edit .env: set VITE_API_URL
 
 # Start development server
 npm run dev
 ```
 
 Frontend akan berjalan di: **http://localhost:5173**
+
+**Environment Variables (.env.example):**
+```env
+VITE_API_URL=http://localhost:8000
+```
 
 ### 4. Akun Testing
 
@@ -183,37 +184,6 @@ Setelah seeding, gunakan akun berikut:
 |------|-------|----------|
 | **User** | user@example.com | password |
 | **Admin** | admin@example.com | password |
-
----
-
-## 🌐 Deployment
-
-### Backend (Railway)
-
-1. Push ke GitHub
-2. Connect repository di Railway
-3. Set environment variables:
-   ```
-   APP_URL=https://your-app.railway.app
-   FORCE_HTTPS=true
-   DB_CONNECTION=mysql
-   DB_HOST=<railway-mysql-host>
-   DB_DATABASE=<database-name>
-   DB_USERNAME=<username>
-   DB_PASSWORD=<password>
-   ```
-4. Deploy otomatis saat push ke `main`
-
-### Frontend (Vercel)
-
-1. Connect repository di Vercel
-2. Set build command: `npm run build`
-3. Set output directory: `dist`
-4. Set environment variable:
-   ```
-   VITE_API_URL=https://your-backend.railway.app
-   ```
-5. Deploy otomatis saat push ke `main`
 
 ---
 
@@ -256,68 +226,38 @@ Setelah seeding, gunakan akun berikut:
 
 ---
 
-## 🧪 Testing
+## 🌐 Deployment
 
-### Backend Testing
+### Backend (Railway)
 
-```bash
-cd be-ganesha-event
+1. Push ke GitHub
+2. Connect repository di Railway
+3. Set environment variables:
+   ```
+   APP_URL=https://your-app.railway.app
+   FORCE_HTTPS=true
+   DB_CONNECTION=mysql
+   DB_HOST=<railway-mysql-host>
+   DB_DATABASE=<database-name>
+   DB_USERNAME=<username>
+   DB_PASSWORD=<password>
+   ```
+4. Deploy otomatis saat push ke `main`
 
-# Run all tests
-php artisan test
+### Frontend (Vercel)
 
-# Run performance tests
-php artisan test --filter=PerformanceTest
-
-# Run with coverage
-php artisan test --coverage
-```
-
-**Test Results**:
-- ✅ 9/9 tests passed
-- ✅ Response time: < 30ms average
-- ✅ Query efficiency: 1-4 queries per request
-
-### Frontend Testing
-
-```bash
-cd fe-ganesha-event
-
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
-```
-
-**PageSpeed Insights Results**:
-- ✅ Performance: 97/100
-- ✅ Accessibility: 89/100
-- ✅ Best Practices: 96/100
-- ✅ SEO: 100/100
+1. Connect repository di Vercel
+2. Set build command: `npm run build`
+3. Set output directory: `dist`
+4. Set environment variable:
+   ```
+   VITE_API_URL=https://your-backend.railway.app
+   ```
+5. Deploy otomatis saat push ke `main`
 
 ---
 
-## 📚 Dokumentasi
-
-### Dokumentasi Lengkap
-
-| Dokumen | Deskripsi |
-|---------|-----------|
-| [teknikal.md](teknikal.md) | Dokumentasi teknis detail (kode, arsitektur, flow) |
-| [panduan-system-integration-testing.md](panduan-system-integration-testing.md) | Panduan SIT dengan 7 skenario testing |
-| [panduan-whitebox-performance-testing.md](panduan-whitebox-performance-testing.md) | Panduan performance testing |
-| [hasil-whitebox-performance-testing.md](hasil-whitebox-performance-testing.md) | Hasil testing lengkap |
-
-### Diagram
-
-- **Use Case Diagram**: `usecase_diagram.puml`
-- **ERD**: `erd_diagram.puml`
-- **Flow Diagram**: `flow_diagram.puml`
-
----
-
-## 🏗️ Arsitektur Proyek
+## 🏗️ Struktur Proyek
 
 ```
 GaneshaEvent/
@@ -337,19 +277,20 @@ GaneshaEvent/
 │   │   └── seeders/
 │   ├── routes/
 │   │   └── api.php
-│   └── tests/Feature/
-│       └── PerformanceTest.php
+│   └── .env.example
 │
-└── fe-ganesha-event/          # React Frontend
-    ├── src/
-    │   ├── pages/
-    │   │   ├── frontpages/    # 6 halaman user
-    │   │   └── adminpages/    # 3 halaman admin
-    │   ├── components/        # Reusable components
-    │   ├── store/             # Zustand state management
-    │   ├── lib/               # Axios config
-    │   └── hooks/             # Custom React hooks
-    └── public/
+├── fe-ganesha-event/          # React Frontend
+│   ├── src/
+│   │   ├── pages/
+│   │   │   ├── frontpages/    # 6 halaman user
+│   │   │   └── adminpages/    # 3 halaman admin
+│   │   ├── components/        # Reusable components
+│   │   ├── store/             # Zustand state management
+│   │   └── lib/               # Axios config
+│   └── .env.example
+│
+├── README.md                  # Project documentation
+└── teknikal.md                # Technical documentation
 ```
 
 ---
@@ -390,66 +331,35 @@ npm install
 
 ---
 
-## 📝 Catatan Pengembang
+## 📊 Performance Results
 
-### Database Schema
+### Backend API
+- ✅ Average response time: **< 10ms**
+- ✅ Query efficiency: **1-4 queries per request**
+- ✅ All tests passing (9/9)
 
-**Tabel `users`**:
-- `id`, `name`, `email`, `password`, `role` (enum: user/admin), `nim`, `phone`
-
-**Tabel `events`**:
-- `id`, `title`, `slug`, `description`, `date`, `time`, `location`, `organizer`, `price`, `image_url`, `certificate_template`, `is_completed`
-
-**Tabel `tickets`**:
-- `id`, `user_id`, `event_id`, `ticket_code`, `status` (enum: menunggu_konfirmasi/dikonfirmasi/ditolak), `payment_proof`, `is_attended`
-
-### File Storage
-
-- **Event Images**: `storage/app/public/events/`
-- **Payment Proofs**: `storage/app/public/payments/`
-- **Certificate Templates**: `storage/app/public/certificates/templates/`
-
-### Environment Variables
-
-**Backend (.env)**:
-```env
-APP_URL=https://your-backend.railway.app
-FORCE_HTTPS=true
-DB_CONNECTION=mysql
-SANCTUM_STATEFUL_DOMAINS=your-frontend.vercel.app
-```
-
-**Frontend (.env)**:
-```env
-VITE_API_URL=https://your-backend.railway.app
-```
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License.
+### Frontend
+- ✅ PageSpeed Performance: **97/100**
+- ✅ SEO: **100/100**
+- ✅ Best Practices: **96/100**
+- ✅ Accessibility: **89/100**
 
 ---
 
 ## 👥 Team
 
-- **Developer**: [Your Name]
-- **Institution**: Universitas Ganesha
-- **Course**: Pengembangan Aplikasi Web
-- **Year**: 2025
+### Developers
+- **Very Irawan Simbolon** (2315091092)
+- **Putu Aldi Rama Pradika Yasa** (2315091043)
+
+### Institution
+**Universitas Pendidikan Ganesha**
+
+### Course
+**Pemrograman Web**
+
+### Year
+2025
 
 ---
 
@@ -465,7 +375,7 @@ This project is licensed under the MIT License.
 
 <div align="center">
 
-**Made with ❤️ for Universitas Ganesha**
+**Made with ❤️ for Universitas Pendidikan Ganesha**
 
 [⬆ Back to Top](#-ganesha-event---platform-manajemen-event-kampus)
 
