@@ -1,183 +1,472 @@
-# Ganesha Event - Project Documentation
+# 🎓 Ganesha Event - Platform Manajemen Event Kampus
 
-## Deskripsi
-Ganesha Event adalah platform manajemen event kampus yang memungkinkan mahasiswa mendaftar event, mendapatkan tiket QR Code, dan mengunduh sertifikat secara digital. Aplikasi ini dikembangkan menggunakan **Laravel 11** (Backend, sebagai API) dan **React + Vite** (Frontend).
+<div align="center">
+
+![Performance](https://img.shields.io/badge/Performance-97%2F100-brightgreen)
+![SEO](https://img.shields.io/badge/SEO-100%2F100-brightgreen)
+![Best%20Practices](https://img.shields.io/badge/Best%20Practices-96%2F100-brightgreen)
+![Laravel](https://img.shields.io/badge/Laravel-12.0-red)
+![React](https://img.shields.io/badge/React-18.3.1-blue)
+![PHP](https://img.shields.io/badge/PHP-8.2-purple)
+
+**Platform modern untuk manajemen event kampus dengan sistem tiket QR Code dan sertifikat digital otomatis**
+
+[Demo Live](https://ganesha-event.vercel.app) · [API Docs](#-api-endpoints) · [Report Bug](https://github.com/verisimb/GaneshaEvent/issues)
+
+</div>
 
 ---
 
-## 🏗️ Tech Stack
-- **Backend**: Laravel 11, MySQL, PHP 8.2+
-- **Frontend**: React.js, Vite, Tailwind CSS, Zustand (State Management)
-- **Database**: MySQL
+## 📋 Daftar Isi
+
+- [Tentang Proyek](#-tentang-proyek)
+- [Fitur Utama](#-fitur-utama)
+- [Tech Stack](#️-tech-stack)
+- [Quick Start](#-quick-start)
+- [Deployment](#-deployment)
+- [API Endpoints](#-api-endpoints)
+- [Testing](#-testing)
+- [Dokumentasi](#-dokumentasi)
 
 ---
 
-## 🚀 Cara Menjalankan Project
+## 🎯 Tentang Proyek
 
-### 1. Backend (Laravel)
-Pastikan Anda berada di folder `be-ganesha-event`.
+**Ganesha Event** adalah platform manajemen event kampus yang memungkinkan mahasiswa untuk:
+- 📝 Mendaftar event (gratis/berbayar)
+- 🎫 Mendapatkan tiket QR Code unik
+- ✅ Scan QR untuk absensi
+- 🏆 Download sertifikat digital otomatis
+
+Aplikasi ini dikembangkan sebagai tugas akhir mata kuliah **Pengembangan Aplikasi Web** dengan arsitektur **REST API** (Laravel) dan **SPA** (React).
+
+### 🎨 Screenshots
+
+<details>
+<summary>Lihat Screenshots</summary>
+
+- **Home Page**: Landing page dengan daftar event
+- **Event Detail**: Informasi lengkap event dan form pendaftaran
+- **Dashboard User**: Tiket saya dan sertifikat
+- **Admin Panel**: Kelola event, verifikasi pembayaran, scan QR
+
+</details>
+
+---
+
+## ✨ Fitur Utama
+
+### 👤 Fitur User
+
+| Fitur | Deskripsi |
+|-------|-----------|
+| **Pendaftaran Event** | Daftar event gratis (auto-confirm) atau berbayar (upload bukti bayar) |
+| **Tiket QR Code** | Setiap tiket memiliki QR Code unik (format: `TCKT-XXXXX`) |
+| **My Tickets** | Lihat semua tiket yang dimiliki dengan status real-time |
+| **Sertifikat Digital** | Download sertifikat otomatis dengan nama tercetak (untuk peserta yang hadir) |
+| **Search & Filter** | Cari event berdasarkan judul atau lokasi |
+
+### 👨‍💼 Fitur Admin
+
+| Fitur | Deskripsi |
+|-------|-----------|
+| **Kelola Event** | CRUD event lengkap dengan upload banner dan template sertifikat |
+| **Verifikasi Pembayaran** | Approve/reject pendaftaran event berbayar |
+| **QR Scanner** | Scan tiket peserta untuk absensi hari-H (dengan kamera atau input manual) |
+| **Generate Sertifikat** | Upload template, sistem otomatis cetak nama peserta |
+| **Dashboard Analytics** | Statistik event, pendaftar, dan kehadiran |
+
+---
+
+## 🛠️ Tech Stack
+
+### Backend
+- **Framework**: Laravel 12.0
+- **Language**: PHP 8.2+
+- **Database**: MySQL 8.0
+- **Authentication**: Laravel Sanctum (Token-based)
+- **Image Processing**: Intervention Image 3.11 (GD Driver)
+- **Testing**: PHPUnit 11.5
+
+### Frontend
+- **Framework**: React 18.3.1
+- **Build Tool**: Vite 7.2
+- **Styling**: Tailwind CSS 3.4
+- **State Management**: Zustand 5.0
+- **Routing**: React Router DOM 7.10
+- **HTTP Client**: Axios 1.13 + TanStack Query 5.90
+- **QR Code**: html5-qrcode 2.3, qrcode.react 4.2
+- **UI Components**: Lucide React, SweetAlert2, React Hot Toast
+- **SEO**: React Helmet Async 2.0
+- **Analytics**: React GA4 2.1
+
+### DevOps & Deployment
+- **Backend**: Railway (https://ganeshaevent-production.up.railway.app)
+- **Frontend**: Vercel (https://ganesha-event.vercel.app)
+- **CI/CD**: GitHub Actions (auto-deploy on push)
+- **Database**: Railway MySQL
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
 ```bash
+# Required
+- PHP >= 8.2
+- Composer
+- Node.js >= 18
+- MySQL >= 8.0
+
+# Optional
+- Git
+```
+
+### 1. Clone Repository
+
+```bash
+git clone https://github.com/verisimb/GaneshaEvent.git
+cd GaneshaEvent
+```
+
+### 2. Setup Backend (Laravel)
+
+```bash
+cd be-ganesha-event
+
 # Install dependencies
 composer install
 
-# Setup Environment (.env)
+# Setup environment
 cp .env.example .env
-# (Lalu sesuaikan DB_DATABASE=ganesha_event, DB_USERNAME, DB_PASSWORD di file .env)
+# Edit .env: set DB_DATABASE, DB_USERNAME, DB_PASSWORD
 
-# Generate Key
+# Generate application key
 php artisan key:generate
 
-# Migrasi Database & Seeding
+# Run migrations & seeders
 php artisan migrate:fresh --seed
 
-# Link Storage (Untuk upload gambar)
+# Link storage (for uploads)
 php artisan storage:link
 
-# Jalankan Server
+# Start server
 php artisan serve
 ```
-Backend akan berjalan di: `http://localhost:8000`
 
-### 2. Frontend (React)
-Pastikan Anda berada di folder `fe-ganesha-event`.
+Backend akan berjalan di: **http://localhost:8000**
+
+### 3. Setup Frontend (React)
+
 ```bash
+cd fe-ganesha-event
+
 # Install dependencies
 npm install
 
-# Jalankan Frontend
+# Setup environment
+cp .env.example .env
+# Edit .env: set VITE_API_URL=http://localhost:8000
+
+# Start development server
 npm run dev
 ```
-Frontend akan berjalan di: `http://localhost:5173`
+
+Frontend akan berjalan di: **http://localhost:5173**
+
+### 4. Akun Testing
+
+Setelah seeding, gunakan akun berikut:
+
+| Role | Email | Password |
+|------|-------|----------|
+| **User** | user@example.com | password |
+| **Admin** | admin@example.com | password |
 
 ---
 
-## 🔑 Fitur Utama
-1.  **Pendaftaran Event**: User bisa mendaftar event gratis (otomatis dikonfirmasi) atau berbayar (menunggu konfirmasi).
-2.  **Manajemen Tiket**: Tiket memiliki QR Code unik (`TCKT-XXX`). Status tiket: `menunggu_konfirmasi`, `dikonfirmasi`, `ditolak`.
-3.  **Sertifikat Digital**: User yang **sudah hadir** (`is_attended = 1`) dan event memiliki link sertifikat, dapat mengunduh sertifikat di menu "Sertifikat Saya".
-4.  **Role-Based Access Control (RBAC)**: Sistem membedakan hak akses antara **User** (Pendaftar) dan **Admin** (Pengelola). Halaman Admin terlindungi dan tidak bisa diakses oleh user biasa.
-5.  **Autentikasi Aman**: Menggunakan Laravel Sanctum untuk keamanan API. Login & Register wajib untuk mengakses fitur tiket.
+## 🌐 Deployment
+
+### Backend (Railway)
+
+1. Push ke GitHub
+2. Connect repository di Railway
+3. Set environment variables:
+   ```
+   APP_URL=https://your-app.railway.app
+   FORCE_HTTPS=true
+   DB_CONNECTION=mysql
+   DB_HOST=<railway-mysql-host>
+   DB_DATABASE=<database-name>
+   DB_USERNAME=<username>
+   DB_PASSWORD=<password>
+   ```
+4. Deploy otomatis saat push ke `main`
+
+### Frontend (Vercel)
+
+1. Connect repository di Vercel
+2. Set build command: `npm run build`
+3. Set output directory: `dist`
+4. Set environment variable:
+   ```
+   VITE_API_URL=https://your-backend.railway.app
+   ```
+5. Deploy otomatis saat push ke `main`
 
 ---
 
-## 📡 API Endpoints (Ringkasan)
+## 📡 API Endpoints
 
-**Base URL:** `http://localhost:8000/api`
+**Base URL**: `https://ganeshaevent-production.up.railway.app/api`
 
-| Method | Endpoint | Deskripsi |
-| :--- | :--- | :--- |
-| Method | Endpoint | Deskripsi |
-| :--- | :--- | :--- |
-| `GET` | `/events` | List semua event (Public) |
-| `POST` | `/events` | Buat event baru (Admin Only) |
-| `GET` | `/my-tickets` | List tiket user (Protected: User) |
-| `POST` | `/tickets` | Daftar event (Protected: User) |
+### Public Endpoints
 
-*Catatan: Dokumentasi lengkap API dan cara menggunakan Postman tersedia di file `postman_guide.md` (jika ada) atau artifact terpisah.*
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/register` | Register user baru |
+| `POST` | `/login` | Login user |
+| `GET` | `/events` | List semua event (support `?search=`) |
+| `GET` | `/events/{id}` | Detail event |
 
----
+### Protected Endpoints (Require Authentication)
 
-## 🛠️ Catatan Pengembang
-- **QR Code**: Digenerate otomatis saat tiket dibuat di backend.
-- **Sertifikat**: Link sertifikat disimpan di tabel `events`. Fitur download hanya aktif jika admin menandai `is_attended = 1` pada tiket user di database.
-- **Gambar Event**: Disimpan di `storage/app/public/events`.
-- **Bukti Bayar**: Disimpan di `storage/app/public/payments`.
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/logout` | Logout user |
+| `GET` | `/me` | Get current user info |
+| `GET` | `/my-tickets` | List tiket user |
+| `POST` | `/tickets` | Daftar event |
+| `GET` | `/tickets/{id}` | Detail tiket |
+| `GET` | `/tickets/{id}/certificate/download` | Download sertifikat |
 
----
+### Admin Endpoints
 
-## 👤 Akun Testing (Seeder)
-- **User**: `test@example.com` (Password: `password`)
-- **Admin**: `admin@ganesha.com` (Password: `password`) - *Jalankan `php artisan migrate:fresh --seed` untuk membuat akun ini.*
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/events` | Create event |
+| `PUT` | `/events/{id}` | Update event |
+| `DELETE` | `/events/{id}` | Delete event |
+| `GET` | `/events/{id}/tickets` | List pendaftar event |
+| `PUT` | `/tickets/{id}/status` | Update status tiket |
+| `POST` | `/tickets/verify` | Verify QR code |
 
----
-
-## � Fitur Admin Panel
-
-Halaman Admin dapat diakses melalui route `/admin`. Fitur ini memungkinkan administrator untuk mengelola event, pendaftar, dan absensi hari-H.
-
-### 1. Kelola Kegiatan (Manage Events)
-Route: `/admin/events`
-Menu ini berfungsi untuk **CRUD Event** (Create, Read, Update, Delete).
-
-- **Tampilan Utama**: Grid Cards event yang sudah dibuat.
-- **Fitur**:
-    - **Buat Event Baru**: Form lengkap untuk judul, deskripsi, waktu, lokasi, harga (Gratis/Berbayar), info pembayaran, dan upload banner.
-    - **Sertifikat Digital**: Pada menu **Edit Event**, admin dapat memasukkan link GDrive/Sertifikat (`certificate_link`). Link ini akan muncul di dashboard user yang hadir.
-    - **Edit & Hapus**: Mengubah informasi event yang sudah berjalan atau menghapusnya.
-
-### 2. Kelola Pendaftar (Manage Registrations)
-Route: `/admin/registrations`
-Menu ini digunakan untuk memverifikasi pembayaran peserta event berbayar.
-
-- **Alur**: Pilih Event -> Lihat Tabel Pendaftar.
-- **Fitur Table**:
-    - Menampilkan Nama, Email, dan Status Tiket.
-    - **Cek Bukti Bayar**: Klik tombol "Lihat" (ikon mata) untuk melihat foto bukti transfer.
-    - **Verifikasi**:
-        - ✅ **Konfirmasi**: Mengubah status menjadi `Confirmed` (Tiket QR Code aktif).
-        - ❌ **Tolak**: Mengubah status menjadi `Rejected` (Jika bukti bayar salah).
-
-### 3. Absensi & QR Scanner (Attendance)
-Route: `/admin/attendance`
-Halaman ini dirancang untuk petugas registrasi saat hari-H acara.
-
-- **Cara Kerja**:
-    1. Pilih Event yang sedang berlangsung.
-    2. Browser akan meminta izin akses **Kamera**.
-    3. Arahkan kamera ke **QR Code Tiket** peserta.
-    4. Sistem otomatis memverifikasi ke server.
-- **Status Scan**:
-    - 🟢 **Sukses**: Data valid, peserta ditandai hadir (`is_attended = 1`).
-    - 🟡 **Peringatan**: Peserta sudah scan sebelumnya (sudah masuk).
-    - 🔴 **Gagal**: QR Code tidak valid atau beda event.
-- **Input Manual**: Jika kamera bermasalah, admin bisa mengetik Kode Tiket (misal `TCKT-123`) secara manual.
+**Authentication**: Gunakan header `Authorization: Bearer {token}`
 
 ---
 
-## 🏆 Sertifikat Otomatis (New Feature)
+## 🧪 Testing
 
-Fitur baru memungkinkan sistem menghasilkan sertifikat secara otomatis dengan nama peserta tercetak di atasnya.
-
-### Cara Menggunakan (Admin)
-1. Buka menu **Manage Events**.
-2. Edit event yang diinginkan.
-3. Upload **Template Sertifikat** (Gambar kosong, format PNG/JPG).
-4. Saat event selesai, klik tombol **"Selesaikan Event"** (Complete Event).
-5. Sistem akan menandai event sebagai selesai dan mengaktifkan download sertifikat bagi peserta yang hadir (`is_attended = 1`).
-
-### Cara Menggunakan (User)
-1. Pastikan sudah hadir dan discan tiketnya oleh panitia.
-2. Buka menu **Sertifikat Saya**.
-3. Klik **Download**. Sistem akan menempelkan nama Anda di atas template yang diupload admin.
-
----
-
-## 🔄 Panduan Update Developer (Desember 2025)
-
-Jika Anda baru saja menarik perubahan terbaru dari repository (`git pull`), jalankan perintah berikut untuk menyinkronkan project:
-
-### 1. Update Backend
-Folder: `be-ganesha-event`
+### Backend Testing
 
 ```bash
-# 1. Install Library baru (Intervention Image)
-composer install
+cd be-ganesha-event
 
-# 2. Update Database (Kolom baru: certificate_template, is_completed)
-php artisan migrate
+# Run all tests
+php artisan test
 
-# 3. Pastikan Font tersedia
-# File 'public/fonts/OpenSans-Bold.ttf' harus ada untuk generate sertifikat.
-# Jika tidak ada, download font ttf apa saja dan rename menjadi OpenSans-Bold.ttf
+# Run performance tests
+php artisan test --filter=PerformanceTest
+
+# Run with coverage
+php artisan test --coverage
 ```
 
-### 2. Update Frontend
-Folder: `fe-ganesha-event`
+**Test Results**:
+- ✅ 9/9 tests passed
+- ✅ Response time: < 30ms average
+- ✅ Query efficiency: 1-4 queries per request
+
+### Frontend Testing
 
 ```bash
-# 1. Install dependencies baru (jika ada)
+cd fe-ganesha-event
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+**PageSpeed Insights Results**:
+- ✅ Performance: 97/100
+- ✅ Accessibility: 89/100
+- ✅ Best Practices: 96/100
+- ✅ SEO: 100/100
+
+---
+
+## 📚 Dokumentasi
+
+### Dokumentasi Lengkap
+
+| Dokumen | Deskripsi |
+|---------|-----------|
+| [teknikal.md](teknikal.md) | Dokumentasi teknis detail (kode, arsitektur, flow) |
+| [panduan-system-integration-testing.md](panduan-system-integration-testing.md) | Panduan SIT dengan 7 skenario testing |
+| [panduan-whitebox-performance-testing.md](panduan-whitebox-performance-testing.md) | Panduan performance testing |
+| [hasil-whitebox-performance-testing.md](hasil-whitebox-performance-testing.md) | Hasil testing lengkap |
+
+### Diagram
+
+- **Use Case Diagram**: `usecase_diagram.puml`
+- **ERD**: `erd_diagram.puml`
+- **Flow Diagram**: `flow_diagram.puml`
+
+---
+
+## 🏗️ Arsitektur Proyek
+
+```
+GaneshaEvent/
+├── be-ganesha-event/          # Laravel Backend
+│   ├── app/
+│   │   ├── Http/Controllers/Api/
+│   │   │   ├── AuthController.php
+│   │   │   ├── EventController.php
+│   │   │   ├── TicketController.php
+│   │   │   └── CertificateController.php
+│   │   └── Models/
+│   │       ├── User.php
+│   │       ├── Event.php
+│   │       └── Ticket.php
+│   ├── database/
+│   │   ├── migrations/
+│   │   └── seeders/
+│   ├── routes/
+│   │   └── api.php
+│   └── tests/Feature/
+│       └── PerformanceTest.php
+│
+└── fe-ganesha-event/          # React Frontend
+    ├── src/
+    │   ├── pages/
+    │   │   ├── frontpages/    # 6 halaman user
+    │   │   └── adminpages/    # 3 halaman admin
+    │   ├── components/        # Reusable components
+    │   ├── store/             # Zustand state management
+    │   ├── lib/               # Axios config
+    │   └── hooks/             # Custom React hooks
+    └── public/
+```
+
+---
+
+## 🔧 Troubleshooting
+
+### Backend Issues
+
+**Error: GD extension not found**
+```bash
+# Mac
+brew install php@8.2-gd
+
+# Ubuntu/Debian
+sudo apt-get install php8.2-gd
+
+# Restart server
+php artisan serve
+```
+
+**Error: Storage link not found**
+```bash
+php artisan storage:link
+```
+
+### Frontend Issues
+
+**Error: API connection failed**
+- Cek `VITE_API_URL` di `.env`
+- Pastikan backend running
+- Cek CORS settings di Laravel
+
+**Error: Module not found**
+```bash
+rm -rf node_modules package-lock.json
 npm install
-
-# 2. Jalankan ulang server
-npm run dev
 ```
+
+---
+
+## 📝 Catatan Pengembang
+
+### Database Schema
+
+**Tabel `users`**:
+- `id`, `name`, `email`, `password`, `role` (enum: user/admin), `nim`, `phone`
+
+**Tabel `events`**:
+- `id`, `title`, `slug`, `description`, `date`, `time`, `location`, `organizer`, `price`, `image_url`, `certificate_template`, `is_completed`
+
+**Tabel `tickets`**:
+- `id`, `user_id`, `event_id`, `ticket_code`, `status` (enum: menunggu_konfirmasi/dikonfirmasi/ditolak), `payment_proof`, `is_attended`
+
+### File Storage
+
+- **Event Images**: `storage/app/public/events/`
+- **Payment Proofs**: `storage/app/public/payments/`
+- **Certificate Templates**: `storage/app/public/certificates/templates/`
+
+### Environment Variables
+
+**Backend (.env)**:
+```env
+APP_URL=https://your-backend.railway.app
+FORCE_HTTPS=true
+DB_CONNECTION=mysql
+SANCTUM_STATEFUL_DOMAINS=your-frontend.vercel.app
+```
+
+**Frontend (.env)**:
+```env
+VITE_API_URL=https://your-backend.railway.app
+```
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+## 👥 Team
+
+- **Developer**: [Your Name]
+- **Institution**: Universitas Ganesha
+- **Course**: Pengembangan Aplikasi Web
+- **Year**: 2025
+
+---
+
+## 🙏 Acknowledgments
+
+- Laravel Framework
+- React.js
+- Tailwind CSS
+- Railway & Vercel for hosting
+- All open-source libraries used in this project
+
+---
+
+<div align="center">
+
+**Made with ❤️ for Universitas Ganesha**
+
+[⬆ Back to Top](#-ganesha-event---platform-manajemen-event-kampus)
+
+</div>

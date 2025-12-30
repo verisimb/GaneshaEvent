@@ -1,0 +1,30 @@
+@startuml
+start
+:Login ke Aplikasi;
+:Pilih Event;
+:Lihat Detail Event;
+:Klik Tombol Daftar;
+
+if (Event Berbayar?) then (Ya)
+  :Upload Bukti Pembayaran;
+  :Sistem Menyimpan Data (Status: Menunggu Konfirmasi);
+  :Admin Cek Pembayaran;
+  if (Pembayaran Valid?) then (Ya)
+    :Admin Verifikasi / Terima;
+    :Sistem Update Status "Dikonfirmasi";
+    :Sistem Generate QR Code Tiket;
+    :Mahasiswa Menerima Tiket;
+  else (Tidak)
+    :Admin Tolak Pendaftaran;
+    :Sistem Update Status "Ditolak";
+    :Mahasiswa Menerima Notifikasi Ditolak;
+  endif
+else (Tidak)
+  :Sistem Menyimpan Data;
+  :Sistem Otomatis Update Status "Dikonfirmasi";
+  :Sistem Generate QR Code Tiket;
+  :Mahasiswa Menerima Tiket;
+endif
+
+stop
+@enduml
