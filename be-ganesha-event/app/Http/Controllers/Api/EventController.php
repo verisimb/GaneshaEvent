@@ -106,7 +106,7 @@ class EventController extends Controller
             }
 
             $path = $request->file('image')->store('events', 'public');
-            $validated['image_url'] = url('storage/' . $path);
+            $validated['image_url'] = secure_url('storage/' . $path);
         }
 
         $event->update($validated);
