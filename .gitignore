@@ -1,2 +1,9 @@
 laravelToko/
 Praktikum_React/
+# Local files (not in GitHub repo)
+docs/
+diagrams/
+screenshots/
+SUMMARY.md
+Dokumen-Laporan-Tugas-Kuliah.md
+.DS_Store
